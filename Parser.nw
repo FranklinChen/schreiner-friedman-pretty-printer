@@ -1,4 +1,4 @@
-% Parser.nw is in -*-LaTeX-*-
+% Parser.nw
 % For Parser.grm
 
 \title{Parser for Compiler in [[mosmlyac]]}

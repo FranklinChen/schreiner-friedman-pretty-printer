@@ -1,4 +1,4 @@
-% Main.nw is in -*-LaTeX-*-
+% Main.nw
 % For Main.sml
 
 \title{Main Driver for Compiler using [[mosmllex]] and [[mosmlyac]]}

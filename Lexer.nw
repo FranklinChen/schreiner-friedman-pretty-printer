@@ -1,4 +1,4 @@
-% Lexer.nw is in -*-LaTeX-*-
+% Lexer.nw
 % For Lexer.sig and Lexer.lex
 
 \title{Lexer for Compiler in [[mosmllex]]}
