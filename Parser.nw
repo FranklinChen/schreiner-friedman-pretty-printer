@@ -25,9 +25,10 @@ The specification file has a well-defined format:
 
 \section{Header}
 
-[FMC] So far we have no header.
+We prefer not to [[open]] modules unnecessarily.
 
 <<Header>>=
+(* Empty *)
 @
 
 \section{Declarations}
@@ -156,39 +157,40 @@ We only have one entry point.
 
 <<Entry points>>=
 %start program
-%type <unit> program
+%type <Format.action> program
 @
 
-The other nonterminal types could be deduced, but we specify them
-explicitly anyway, as good self-documentation.
+Note the pervasive passing around of [[Format.action]].
 
 <<Other nonterminal types>>=
-%type <unit> definitions
-%type <unit> definition
-%type <unit> function_definition
-%type <unit> optional_parameter_list
-%type <unit> parameter_list
-%type <unit> parameter_declarations
-%type <unit> parameter_declaration
-%type <unit> parameter_declarator_list
-%type <unit> compound_statement
-%type <unit> declarations
-%type <unit> declaration
-%type <unit> declarator_list
-%type <unit> statements
-%type <unit> statement
-%type <unit> if_prefix
-%type <unit> loop_prefix
-%type <unit> expression
-%type <unit> binary
-%type <unit> optional_argument_list
-%type <unit> argument_list
+%type <Format.action> definitions
+%type <Format.action> definition
+%type <Format.action> function_definition
+%type <Format.action> optional_parameter_list
+%type <Format.action> parameter_list
+%type <Format.action> parameter_declarations
+%type <Format.action> parameter_declaration
+%type <Format.action> parameter_declarator_list
+%type <Format.action> compound_statement
+%type <Format.action> declarations
+%type <Format.action> declaration
+%type <Format.action> declarator_list
+%type <Format.action> statements
+%type <Format.action> statement
+%type <Format.action> if_prefix
+%type <Format.action> loop_prefix
+%type <Format.action> expression
+%type <Format.action> binary
+%type <Format.action> optional_argument_list
+%type <Format.action> argument_list
+<<Dummy nonterminal types>>
 @
 
 \section{Rules}
 
-Note that for now, everything returns [[()]] because we only have a
-recognizer.
+Note that various synthesized attributes are now functions, in order
+to simulate the inherited formatter attribute we pass around to do
+pretty-printing.
 
 <<Rules>>=
 <<Main entry point>>
@@ -197,7 +199,7 @@ recognizer.
 
 <<Main entry point>>=
 program
-        : definitions EOF { () }
+        : definitions EOF { $1 }
 @ %def program
 
 We will expand each of these later.
@@ -223,155 +225,322 @@ We will expand each of these later.
 <<[[binary]]>>
 <<[[optional_argument_list]]>>
 <<[[argument_list]]>>
+<<Rules for dummy nonterminals>>
 @
+
+Use function composition to build up a composite action that will be
+executed.
 
 <<[[definitions]]>>=
 definitions
-        : definition { () }
-        | definitions definition { () }
+        : definition { $1 }
+        | definitions definition { $2 o $1 }
 @ %def definitions
+
+We replace the former [[INT]] with a simple nonterminal [[n_int]] in
+order to associate actions with tokens.
 
 <<[[definition]]>>=
 definition
-        : function_definition { () }
-        | INT function_definition { () }
-        | declaration { () }
+        : function_definition { $1 }
+        | n_int function_definition { $2 o $1 }
+        | declaration { $1 }
 @ %def definition
+
+Note that [[function_definition_1]] and [[function_definition_2]] had
+to be introduced because unlike {\tt yacc}, {\tt mosmlyac} does not
+support actions within rules.
 
 <<[[function_definition]]>>=
 function_definition
-        : Identifier LPAREN optional_parameter_list RPAREN
-          parameter_declarations compound_statement { () }
-@ %def function_definition
+        : n_identifier n_lp optional_parameter_list n_rp
+          function_definition_1
+          parameter_declarations
+          function_definition_2
+          compound_statement { (Format.nl Format.AT) o
+                              $8 o $7 o $6 o $5 o $4 o $3 o $2 o $1 }
+
+function_definition_1: { Format.nl Format.IN }
+
+function_definition_2: { Format.at Format.EX }
+@ %def function_definition function_definition_1 function_definition_2
+
+<<Dummy nonterminal types>>=
+%type <Format.action> function_definition_1
+%type <Format.action> function_definition_2
+@
 
 <<[[optional_parameter_list]]>>=
 optional_parameter_list
-        : /* no formal parameters */ { () }
-        | parameter_list { () }
+        : /* no formal parameters */ { Format.unitAction }
+        | parameter_list { $1 }
 @ %def optional_parameter_list
 
 <<[[parameter_list]]>>=
 parameter_list
-        : Identifier { () }
-        | parameter_list COMMA Identifier { () }
+        : n_identifier { $1 }
+        | parameter_list n_co n_identifier { $3 o $2 o $1 }
 @ %def parameter_list
 
 <<[[parameter_declarations]]>>=
 parameter_declarations
-        : /* null */ { () }
-        | parameter_declarations parameter_declaration { () }
+        : /* null */ { Format.unitAction }
+        | parameter_declarations parameter_declaration { $2 o $1 }
 @ %def parameter_declarations
 
 <<[[parameter_declaration]]>>=
 parameter_declaration
-        : INT parameter_declarator_list SEMI { () }
+        : n_int parameter_declarator_list n_sc { $3 o $2 o $1 }
 @ %def parameter_declaration
 
 <<[[parameter_declarator_list]]>>=
 parameter_declarator_list
-        : Identifier { () }
-        | parameter_declarator_list COMMA Identifier { () }
+        : n_identifier { $1 }
+        | parameter_declarator_list n_co n_identifier { $3 o $2 o $1 }
 @ %def parameter_declarator_list
 
 <<[[compound_statement]]>>=
 compound_statement
-        : LBRACE declarations statements RBRACE { () }
-@ %def compound_statement
+        : n_lr declarations
+          compound_statement_1
+          statements n_rr { $5 o $4 o $3 o $2 o $1 }
+
+compound_statement_1: { Format.nl Format.AT }
+@ %def compound_statement compound_statement_1
+
+<<Dummy nonterminal types>>=
+%type <Format.action> compound_statement_1
+@
 
 <<[[declarations]]>>=
 declarations
-        : /* null */ { () }
-        | declarations declaration { () }
+        : /* null */ { Format.unitAction }
+        | declarations declaration { $2 o $1 }
 @ %def declarations
 
 <<[[declaration]]>>=
 declaration
-        : INT declarator_list SEMI { () }
+        : n_int declarator_list n_sc { $3 o $2 o $1 }
 @ %def declaration
 
 <<[[declarator_list]]>>=
 declarator_list
-        : Identifier { () }
-        | declarator_list COMMA Identifier { () }
+        : n_identifier { $1 }
+        | declarator_list n_co n_identifier { $3 o $2 o $1 }
 @ %def declarator_list
 
 <<[[statements]]>>=
 statements
-        : /* null */ { () }
-        | statements statement { () }
+        : /* null */ { Format.unitAction }
+        | statements statement { $2 o $1 }
 @ %def statements
 
 <<[[statement]]>>=
 statement
-        : expression SEMI { () }
-        | SEMI  /* null statement */ { () }
-        | BREAK SEMI { () }
-        | CONTINUE SEMI { () }
-        | RETURN SEMI { () }
-        | RETURN expression SEMI { () }
-        | compound_statement { () }
-        | if_prefix statement { () }
-        | if_prefix statement ELSE statement { () }
-        | loop_prefix statement { () }
-@ %def statement
+        : expression n_sc { $2 o $1 }
+        | n_sc  /* null statement */ { $1 }
+        | n_break n_sc { $2 o $1 }
+        | n_continue n_sc { $2 o $1 }
+        | n_return n_sc { $2 o $1 }
+        | n_return
+          statement_1
+          expression n_sc { $4 o $3 o $2 o $1 }
+        | compound_statement { $1 }
+        | if_prefix statement { (Format.uncond Format.EX) o $2 o $1 }
+        | if_prefix statement n_else statement { (Format.uncond Format.EX) o
+                                                $4 o $3 o $2 o $1}
+        | loop_prefix statement { (Format.uncond Format.EX) o $2 o $1 }
+
+statement_1: { Format.out " " }
+@ %def statement statement_1
+
+<<Dummy nonterminal types>>=
+%type <Format.action> statement_1
+@
 
 <<[[if_prefix]]>>=
 if_prefix
-        : IF LPAREN expression RPAREN { () }
+        : n_if n_lp expression n_rp { (Format.cond Format.IN) o
+                                     $4 o $3 o $2 o $1 }
 @ %def if_prefix
 
 <<[[loop_prefix]]>>=
 loop_prefix
-        : WHILE LPAREN expression RPAREN { () }
+        : n_while n_lp expression n_rp { (Format.cond Format.IN) o
+                                        $4 o $3 o $2 o $1 }
 @ %def loop_prefix
 
 <<[[expression]]>>=
 expression
-        : binary { () }
-        | expression COMMA binary { () }
+        : binary { $1 }
+        | expression n_co binary { $3 o $2 o $1 }
 @ %def expression
 
 <<[[binary]]>>=
 binary
-        : Identifier { () }
-        | Constant { () }
-        | LPAREN expression RPAREN { () }
-        | Identifier LPAREN optional_argument_list RPAREN { () }
-        | PP Identifier { () }
-        | MM Identifier { () }
-        | binary PLUS binary { () }
-        | binary MINUS binary { () }
-        | binary TIMES binary { () }
-        | binary DIVIDE binary { () }
-        | binary REM binary { () }
-        | binary GT binary { () }
-        | binary LT binary { () }
-        | binary GE binary { () }
-        | binary LE binary { () }
-        | binary EQ binary { () }
-        | binary NE binary { () }
-        | binary AMP binary { () }
-        | binary CARET binary { () }
-        | binary BAR binary { () }
-        | Identifier ASSIGN binary { () }
-        | Identifier PE binary { () }
-        | Identifier ME binary { () }
-        | Identifier TE binary { () }
-        | Identifier DE binary { () }
-        | Identifier RE binary { () }
+        : n_identifier { $1 }
+        | n_constant { $1 }
+        | n_lp expression n_rp { $3 o $2 o $1 }
+        | n_identifier n_lp optional_argument_list n_rp { $4 o $3 o $2 o $1 }
+        | n_pp n_identifier %prec PP { $2 o $1 }
+        | n_mm n_identifier %prec PP { $2 o $1 }
+        | binary n_pl binary %prec PLUS { $3 o $2 o $1 }
+        | binary n_mi binary %prec PLUS { $3 o $2 o $1 }
+        | binary n_mu binary %prec TIMES { $3 o $2 o $1 }
+        | binary n_di binary %prec TIMES { $3 o $2 o $1 }
+        | binary n_rm binary %prec TIMES { $3 o $2 o $1 }
+        | binary n_gt binary %prec GT { $3 o $2 o $1 }
+        | binary n_lt binary %prec GT { $3 o $2 o $1 }
+        | binary n_ge binary %prec GT { $3 o $2 o $1 }
+        | binary n_le binary %prec GT { $3 o $2 o $1 }
+        | binary n_eq binary %prec EQ { $3 o $2 o $1 }
+        | binary n_ne binary %prec EQ { $3 o $2 o $1 }
+        | binary n_an binary %prec AMP { $3 o $2 o $1 }
+        | binary n_xo binary %prec CARET { $3 o $2 o $1 }
+        | binary n_or binary %prec BAR { $3 o $2 o $1 }
+        | n_identifier n_as binary %prec ASSIGN { $3 o $2 o $1 }
+        | n_identifier n_pe binary %prec ASSIGN { $3 o $2 o $1 }
+        | n_identifier n_me binary %prec ASSIGN { $3 o $2 o $1 }
+        | n_identifier n_te binary %prec ASSIGN { $3 o $2 o $1 }
+        | n_identifier n_de binary %prec ASSIGN { $3 o $2 o $1 }
+        | n_identifier n_re binary %prec ASSIGN { $3 o $2 o $1 }
 @ %def binary
 
 <<[[optional_argument_list]]>>=
 optional_argument_list
-        : /* no actual arguments */ { () }
-        | argument_list { () }
+        : /* no actual arguments */ { Format.unitAction }
+        | argument_list { $1 }
 @ %def optional_argument_list
 
 <<[[argument_list]]>>=
 argument_list
-        : binary { () }
-        | argument_list COMMA binary { () }
+        : binary { $1 }
+        | argument_list n_co binary { $3 o $2 o $1 }
 @ %def argument_list
+
+\subsection{Dummy nonterminals}
+
+These nonterminals are used to cause actions to be performed for
+tokens.
+
+<<Rules for dummy nonterminals>>=
+n_int: INT { Format.out "int\t" }
+n_identifier: Identifier { Format.out $1 }
+n_lp: LPAREN { Format.out "(" }
+n_rp: RPAREN { Format.out ")" }
+n_co: COMMA { Format.out ", " }
+n_sc: SEMI { (Format.nl Format.AT) o (Format.out ";") }
+n_break: BREAK { Format.out "break" }
+n_continue: CONTINUE { Format.out "continue" }
+n_return: RETURN { Format.out "return" }
+n_lr: LBRACE { (Format.at Format.IN) o
+  (Format.out "{\t") o (Format.cond Format.EX) }
+n_rr: RBRACE { (Format.uncond Format.AT) o
+  (Format.out "}") o (Format.at Format.EX) }
+n_if: IF { Format.out "if " }
+n_else: ELSE { (Format.cond Format.IN) o
+  (Format.out "else") o (Format.at Format.EX) }
+n_while: WHILE { Format.out "while " }
+n_constant: Constant { Format.out (Int.toString $1) }
+n_pp: PP { Format.out " ++ " }
+n_mm: MM { Format.out " -- " }
+n_pl: PLUS { Format.out " + " }
+n_mi: MINUS { Format.out " + " }
+n_mu: TIMES { Format.out " * " }
+n_di: DIVIDE { Format.out " / " }
+n_rm: REM { Format.out " % " }
+n_gt: GT { Format.out " > " }
+n_lt: LT { Format.out " < " }
+n_ge: GE { Format.out " >= " }
+n_le: LE { Format.out " <= " }
+n_eq: EQ { Format.out " == " }
+n_ne: NE { Format.out " != " }
+n_an: AMP { Format.out " & " }
+n_xo: CARET { Format.out " ^ " }
+n_or: BAR { Format.out " | " }
+n_as: ASSIGN { Format.out " = " }
+n_pe: PE { Format.out " += " }
+n_me: ME { Format.out " -= " }
+n_te: TE { Format.out " *= " }
+n_de: DE { Format.out " /= " }
+n_re: RE { Format.out " %= " }
+@ %def n_int
+@ %def n_identifier
+@ %def n_lp
+@ %def n_rp
+@ %def n_co
+@ %def n_sc
+@ %def n_break
+@ %def n_continue
+@ %def n_return
+@ %def n_lr
+@ %def n_rr
+@ %def n_if
+@ %def n_else
+@ %def n_while
+@ %def n_constant
+@ %def n_pp
+@ %def n_mm
+@ %def n_pl
+@ %def n_mi
+@ %def n_mu
+@ %def n_di
+@ %def n_rm
+@ %def n_gt
+@ %def n_lt
+@ %def n_ge
+@ %def n_le
+@ %def n_eq
+@ %def n_ne
+@ %def n_an
+@ %def n_xo
+@ %def n_or
+@ %def n_as
+@ %def n_pe
+@ %def n_me
+@ %def n_te
+@ %def n_de
+@ %def n_re
+
+<<Dummy nonterminal types>>=
+%type <Format.action> n_int
+%type <Format.action> n_identifier
+%type <Format.action> n_lp
+%type <Format.action> n_rp
+%type <Format.action> n_co
+%type <Format.action> n_sc
+%type <Format.action> n_break
+%type <Format.action> n_continue
+%type <Format.action> n_return
+%type <Format.action> n_lr
+%type <Format.action> n_rr
+%type <Format.action> n_if
+%type <Format.action> n_else
+%type <Format.action> n_while
+%type <Format.action> n_constant
+%type <Format.action> n_pp
+%type <Format.action> n_mm
+%type <Format.action> n_pl
+%type <Format.action> n_mi
+%type <Format.action> n_mu
+%type <Format.action> n_di
+%type <Format.action> n_rm
+%type <Format.action> n_gt
+%type <Format.action> n_lt
+%type <Format.action> n_ge
+%type <Format.action> n_le
+%type <Format.action> n_eq
+%type <Format.action> n_ne
+%type <Format.action> n_an
+%type <Format.action> n_xo
+%type <Format.action> n_or
+%type <Format.action> n_as
+%type <Format.action> n_pe
+%type <Format.action> n_me
+%type <Format.action> n_te
+%type <Format.action> n_de
+%type <Format.action> n_re
+@
 
 \section{Trailer}
 
