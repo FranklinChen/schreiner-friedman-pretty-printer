@@ -1,0 +1,27 @@
+NOTANGLE=notangle
+NOWEAVE=noweave
+#CPIF=>
+CPIF=| cpif
+
+.SUFFIXES: .nw .ltx .dvi .html
+.nw.html:
+	$(NOWEAVE) -filter l2h -index -html $< $(CPIF) $@
+.nw.ltx:
+	$(NOWEAVE) -index $< $(CPIF) $@
+.ltx.dvi:
+	latex '\scrollmode \input ' $<
+	while grep -s 'Rerun to get cross-references right' $*.log; do \
+		latex '\scrollmode \input ' $<; \
+	done
+
+#all: topo topo.c topo.dvi topo.html
+#
+#topo.cc: topo.nw
+#	$(NOTANGLE) $< $(CPIF) $@
+#topo.ltx: topo.nw
+#	$(NOWEAVE) -index -autodefs c $< $(CPIF) $@
+#topo.html: topo.nw
+#	$(NOWEAVE) -filter l2h -index -autodefs c -html $< $(CPIF) $@
+#
+#clean:
+#	rm -f *~ *.aux *.tex *.dvi *.log *.html

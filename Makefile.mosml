@@ -1,0 +1,24 @@
+# Unix Makefile stub for separate compilation with Moscow ML.  
+# Cleaned up for general use by Franklin Chen.
+
+MOSMLHOME=/usr/lib/mosml
+MOSMLTOOLS=camlrunm $(MOSMLHOME)/tools
+
+MOSMLC=mosmlc
+MOSMLLD=mosmlc
+MOSMLLEX=mosmllex
+MOSMLYACC=mosmlyac
+MOSMLCUT=$(MOSMLTOOLS)/cutdeps
+MOSMLDEP=$(MOSMLTOOLS)/mosmldep
+
+%.ui: %.sig
+	$(MOSMLC) -c $(MOSMLCFLAGS) $<
+
+%.uo: %.sml
+	$(MOSMLC) -c $(MOSMLCFLAGS) $<
+
+%.sml: %.lex
+	$(MOSMLLEX) $(MOSMLLFLAGS) $<
+
+%.sml %.sig: %.grm
+	$(MOSMLYACC) $(MOSMLYFLAGS) $<
