@@ -1,5 +1,5 @@
 % Lexer.nw is in -*-LaTeX-*-
-% For Lexer.lex
+% For Lexer.sig and Lexer.lex
 
 \title{Lexer for Compiler in [[mosmllex]]}
 \author{Franklin Chen}
@@ -9,6 +9,16 @@
 This is a lexer for the project developed in \cite{Schreiner and
 Friedman}, done in [[mosmllex]] for Moscow ML rather than in [[lex]]
 or [[flex]] for C.
+
+\section{[[Lexer]] signature}
+
+We begin by providing the desired signature.
+
+<<[[Lexer.sig]]>>=
+val Token : Lexing.lexbuf -> Parser.token;
+@
+
+\section{[[Lexer]] specification}
 
 The specification file has a well--defined format:
 
@@ -20,7 +30,7 @@ The specification file has a well--defined format:
 ;
 @
  
-\section{Header}
+\subsection{Header}
 
 <<Header>>=
 <<Modules to open>>
@@ -57,16 +67,16 @@ fun mkKeyword lexbuf =
     handle Subscript => Identifier s
   end
 ;
-@
+@ %def keyword_table mkKeyword
 
-\section{Entry points}
+\subsection{Entry points}
 
 Now we present the entry points.  For now, we have only one.
 
 <<Entry points>>=
 rule Token = parse
   <<Patterns and actions>>
-@
+@ %def Token
 
 <<Patterns and actions>>=
   <<Preprocessor info>>
@@ -131,12 +141,11 @@ Only integer constants are currently supported.
 <<Constants>>=
 [`0`-`9`]+
 {
-  Constant (case Integer.fromString(getLexeme lexbuf) of
-                SOME i => i
-              | _ => 0)
+  Constant (valOf(Int.fromString(getLexeme lexbuf)))
 }
 @
 
+Skip blanks.
 FMC We really need to keep line number info.
 
 <<White space>>=
