@@ -1,4 +1,4 @@
-# Unix Makefile stub for separate compilation with Moscow ML.  
+# Unix Makefile stub for separate compilation with Moscow ML.
 # Cleaned up for general use by Franklin Chen.
 
 MOSMLHOME=/usr/lib/mosml

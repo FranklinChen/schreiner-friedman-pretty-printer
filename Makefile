@@ -14,12 +14,15 @@ SRC = \
 	Main.nw
 
 # Hasht is stolen from mosml compiler source.
-SML_SRC = \
+SML_GEN = \
 	Lexer.sml Lexer.sig \
 	Parser.sml Parser.sig \
 	Format.sml Format.sig \
-	Hasht.sml Hasht.sig \
 	Main.sml
+
+SML_SRC = \
+	$(SML_GEN) \
+	Hasht.sml Hasht.sig
 
 SML_OBJS = \
 	Hasht.uo \
@@ -56,13 +59,16 @@ all: fmt doc
 fmt: $(SML_OBJS)
 	$(MOSMLLD) $(MOSMLLDFLAGS) -o $@ $(LIBOBJS) $(SML_OBJS)
 
-doc: Lexer.dvi Parser.dvi Format.dvi Main.dvi
+doc: Lexer.dvi Parser.dvi Format.dvi Main.dvi \
+	Lexer.html Parser.html Format.html Main.html
 
 install:
 
 # FMC need add stuff.
 clean:
-	rm -f *.ui *.uo Makefile.bak *~ *.aux *.tex *.dvi *.log *.html
+	rm -f *.ui *.uo Makefile.bak \
+	*~ *.aux *.ltx *.dvi *.log *.html \
+	$(SML_GEN) fmt *.lex *.grm *.output
 
 depend: $(SML_SRC)
 	rm -f Makefile.bak
@@ -75,46 +81,38 @@ Lexer.sig: Lexer.nw
 Lexer.lex: Lexer.nw
 	$(NOTANGLE) $< $(CPIF) $@
 Lexer.ltx: Lexer.nw
-# Until we get icon
-#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
-	$(NOWEAVE) -index $< $(CPIF) $@
+	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
 Lexer.html: Lexer.nw
-	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
+	$(NOWEAVE) -filter $(L2H) -index -autodefs sml -html $< $(CPIF) $@
 
 Parser.grm: Parser.nw
 	$(NOTANGLE) $< $(CPIF) $@
 Parser.ltx: Parser.nw
-# Until we get icon
-#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
-	$(NOWEAVE) -index $< $(CPIF) $@
+	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
 Parser.html: Parser.nw
-	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
+	$(NOWEAVE) -filter $(L2H) -index -autodefs sml -html $< $(CPIF) $@
 
 Format.sig: Format.nw
 	$(NOTANGLE) -R"[[$@]]" $< $(CPIF) $@
 Format.sml: Format.nw
 	$(NOTANGLE) $< $(CPIF) $@
 Format.ltx: Format.nw
-# Until we get icon
-#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
-	$(NOWEAVE) -index $< $(CPIF) $@
+	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
 Format.html: Format.nw
-	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
+	$(NOWEAVE) -filter $(L2H) -index -autodefs sml -html $< $(CPIF) $@
 
 Main.sml: Main.nw
 	$(NOTANGLE) $< $(CPIF) $@
 Main.ltx: Main.nw
-# Until we get icon
-#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
-	$(NOWEAVE) -index $< $(CPIF) $@
+	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
 Main.html: Main.nw
-	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
+	$(NOWEAVE) -filter $(L2H) -index -autodefs sml -html $< $(CPIF) $@
 
 ### DO NOT DELETE THIS LINE
-Format.uo: Format.ui 
-Main.uo: Parser.ui Lexer.ui Format.ui 
-Lexer.ui: Parser.ui 
-Lexer.uo: Lexer.ui Parser.ui Hasht.ui 
-Parser.ui: Format.ui 
-Parser.uo: Parser.ui Format.ui 
-Hasht.uo: Hasht.ui 
+Format.uo: Format.ui
+Parser.ui: Format.ui
+Parser.uo: Parser.ui Format.ui
+Lexer.ui: Parser.ui
+Hasht.uo: Hasht.ui
+Main.uo: Parser.ui Format.ui Lexer.ui
+Lexer.uo: Lexer.ui Parser.ui Hasht.ui
