@@ -75,6 +75,12 @@ fun createLexerStream (is : instream) =
 
 <<Parse the lexer stream>>=
 Parser.program Lexer.Token lexbuf
+handle
+    (Lexer.LexicalError (str, num1, num2)) =>
+      fatal ("Lexer error [" ^
+             (Int.toString num1) ^ ", " ^
+             (Int.toString num2) ^ "]: " ^
+             str)
 @
 
 \section{Indices}
