@@ -1,0 +1,279 @@
+% Parser.nw is in -*-LaTeX-*-
+% For Parser.grm
+
+\title{Parser for Compiler in [[mosmlyac]]}
+\author{Franklin Chen}
+
+\maketitle
+
+This is a parser for the project developed in \cite{Schreiner and
+  Friedman}, done in [[mosmlyac]] for Moscow ML rather than in
+[[yacc]] for C.
+
+The specification file has a well--defined format:
+
+<<*>>=
+%{
+<<Header>>
+%}
+<<Declarations>>
+%%
+<<Rules>>
+%%
+<<Trailer>>
+@
+
+\section{Header}
+
+FMC So far we have no header.
+
+<<Header>>=
+@
+
+\section{Declarations}
+
+<<Declarations>>=
+<<Tokens>>
+<<Precedence>>
+<<Entry points>>
+<<Other nonterminal types>>
+@
+
+\subsection{Tokens}
+
+<<Tokens>>=
+%token <string> Identifier
+%token <int> Constant
+%token INT
+%token IF
+%token ELSE
+%token WHILE
+%token BREAK
+%token CONTINUE
+%token RETURN
+%token SEMI
+%token LPAREN
+%token RPAREN
+%token LBRACE
+%token RBRACE
+%token PLUS
+%token MINUS
+%token TIMES
+%token DIVIDE
+%token REM
+%token GT
+%token LT
+%token GE
+%token LE
+%token EQ
+%token NE
+%token AMP
+%token CARET
+%token BAR
+%token ASSIGN
+%token PE
+%token ME
+%token TE
+%token DE
+%token RE
+%token PP
+%token MM
+%token COMMA
+
+%token EOF
+@
+
+<<Precedence>>=
+%right ASSIGN PE ME TE DE RE
+%left BAR
+%left CARET
+%left AMP
+%left EQ NE
+%left LT GT GE LE
+%left PLUS MINUS
+%left TIMES DIVIDE REM
+%right PP MM
+@
+
+\subsection{Nonterminals}
+
+We only have one entry point.
+
+<<Entry points>>=
+%start program
+%type <unit> program
+@
+
+<<Other nonterminal types>>=
+%type <unit> definitions
+%type <unit> definition
+%type <unit> function_definition
+%type <unit> optional_parameter_list
+%type <unit> parameter_list
+%type <unit> parameter_declarations
+%type <unit> parameter_declaration
+%type <unit> parameter_declarator_list
+%type <unit> compound_statement
+%type <unit> declarations
+%type <unit> declaration
+%type <unit> declarator_list
+%type <unit> statements
+%type <unit> statement
+%type <unit> if_prefix
+%type <unit> loop_prefix
+%type <unit> expression
+%type <unit> binary
+%type <unit> optional_argument_list
+%type <unit> argument_list
+@
+
+\section{Rules}
+
+Note that for now, everything returns [[()]] because we only have a
+recognizer.
+
+<<Rules>>=
+  <<Main entry point>>
+  <<Other rules>>
+@
+
+<<Main entry point>>=
+program
+        : definitions EOF { () }
+@
+
+<<Other rules>>=
+definitions
+        : definition { () }
+        | definitions definition { () }
+
+definition
+        : function_definition { () }
+        | INT function_definition { () }
+        | declaration { () }
+
+function_definition
+        : Identifier LPAREN optional_parameter_list RPAREN
+          parameter_declarations compound_statement { () }
+
+optional_parameter_list
+        : /* no formal parameters */ { () }
+        | parameter_list { () }
+
+parameter_list
+        : Identifier { () }
+        | parameter_list COMMA Identifier { () }
+
+parameter_declarations
+        : /* null */ { () }
+        | parameter_declarations parameter_declaration { () }
+
+parameter_declaration
+        : INT parameter_declarator_list SEMI { () }
+
+parameter_declarator_list
+        : Identifier { () }
+        | parameter_declarator_list COMMA Identifier { () }
+
+compound_statement
+        : LBRACE declarations statements RBRACE { () }
+
+declarations
+        : /* null */ { () }
+        | declarations declaration { () }
+
+declaration
+        : INT declarator_list SEMI { () }
+
+declarator_list
+        : Identifier { () }
+        | declarator_list COMMA Identifier { () }
+
+statements
+        : /* null */ { () }
+        | statements statement { () }
+
+statement
+        : expression SEMI { () }
+        | SEMI  /* null statement */ { () }
+        | BREAK SEMI { () }
+        | CONTINUE SEMI { () }
+        | RETURN SEMI { () }
+        | RETURN expression SEMI { () }
+        | compound_statement { () }
+        | if_prefix statement { () }
+        | if_prefix statement ELSE statement { () }
+        | loop_prefix statement { () }
+
+if_prefix
+        : IF LPAREN expression RPAREN { () }
+
+loop_prefix
+        : WHILE LPAREN expression RPAREN { () }
+
+expression
+        : binary { () }
+        | expression COMMA binary { () }
+
+binary
+        : Identifier { () }
+        | Constant { () }
+        | LPAREN expression RPAREN { () }
+        | Identifier LPAREN optional_argument_list RPAREN { () }
+        | PP Identifier { () }
+        | MM Identifier { () }
+        | binary PLUS binary { () }
+        | binary MINUS binary { () }
+        | binary TIMES binary { () }
+        | binary DIVIDE binary { () }
+        | binary REM binary { () }
+        | binary GT binary { () }
+        | binary LT binary { () }
+        | binary GE binary { () }
+        | binary LE binary { () }
+        | binary EQ binary { () }
+        | binary NE binary { () }
+        | binary AMP binary { () }
+        | binary CARET binary { () }
+        | binary BAR binary { () }
+        | Identifier ASSIGN binary { () }
+        | Identifier PE binary { () }
+        | Identifier ME binary { () }
+        | Identifier TE binary { () }
+        | Identifier DE binary { () }
+        | Identifier RE binary { () }
+
+optional_argument_list
+        : /* no actual arguments */ { () }
+        | argument_list { () }
+
+argument_list
+        : binary { () }
+        | argument_list COMMA binary { () }
+@
+
+\section{Trailer}
+
+Empty trailer.
+
+<<Trailer>>=
+@
+
+
+\section{Indices}
+\subsection{Chunks}
+\nowebchunks
+\subsection{Identifiers}
+\nowebindex
+
+\begin{thebibliography}{99}
+
+\bibitem{Schreiner and Friedman}
+Axel T. Schreiner and H. George Friedman, Jr.
+\emph{
+      Introduction to Compiler Construction with UNIX\footnote
+      {UNIX is a trademark of Bell Laboratories.}
+      }.
+Prentice-Hall, Inc., New Jersey, 1985.
+
+\end{thebibliography}
