@@ -1,9 +1,8 @@
 # Makefile for schreiner_sml project.
 # Franklin Chen
 
-include Makefile.stub
-
-# FMC need to put in noweb stuff.
+include Makefile.mosml
+include Makefile.nw
 
 MOSMLYFLAGS = -v
 
@@ -48,17 +47,24 @@ recog: $(SML_OBJS)
 
 install:
 
-# FMC need add
+# FMC need add stuff.
 clean:
-	rm -f *.ui
-	rm -f *.uo
-	rm -f Makefile.bak
+	rm -f *.ui *.uo Makefile.bak *~ *.aux *.tex *.dvi *.log *.html
 
 depend: $(SML_SRC)
 	rm -f Makefile.bak
 	mv Makefile Makefile.bak
 	$(MOSMLCUT) < Makefile.bak > Makefile
 	$(MOSMLDEP) >> Makefile
+
+Lexer.lex: Lexer.nw
+	$(NOTANGLE) $< $(CPIF) $@
+Lexer.ltx: Lexer.nw
+# Until we get icon
+#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
+	$(NOWEAVE) -index $< $(CPIF) $@
+Lexer.html: Lexer.nw
+	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
 
 ### DO NOT DELETE THIS LINE
 Lexer.ui: Parser.ui 
