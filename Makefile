@@ -7,10 +7,10 @@ include Makefile.noweb
 MOSMLYFLAGS = -v
 
 SRC = \
-	Lexer.lex \
-	Parser.grm \
+	Lexer.nw \
+	Parser.nw \
 	Hasht.sml Hasht.sig \
-	Main.sml
+	Main.nw
 
 # Hasht is stolen from mosml compiler source.
 SML_SRC = \
@@ -27,8 +27,7 @@ SML_OBJS = \
 
 # Moscow ML standard library objects needed.
 LIBOBJS = \
-	StringCvt.uo \
-	Integer.uo \
+	Int.uo \
 	Word.uo \
 	Word8.uo \
 	Word8Vector.uo \
@@ -40,10 +39,12 @@ LIBOBJS = \
 	Parsing.uo \
 	Nonstdio.uo
 
-all: recog
+all: recog doc
 
 recog: $(SML_OBJS)
 	$(MOSMLLD) $(MOSMLLDFLAGS) -o $@ $(LIBOBJS) $(SML_OBJS)
+
+doc: Lexer.dvi Parser.dvi Main.dvi
 
 install:
 
@@ -57,6 +58,8 @@ depend: $(SML_SRC)
 	$(MOSMLCUT) < Makefile.bak > Makefile
 	$(MOSMLDEP) >> Makefile
 
+Lexer.sig: Lexer.nw
+	$(NOTANGLE) -R"[[$@]]" $< $(CPIF) $@
 Lexer.lex: Lexer.nw
 	$(NOTANGLE) $< $(CPIF) $@
 Lexer.ltx: Lexer.nw
@@ -66,9 +69,27 @@ Lexer.ltx: Lexer.nw
 Lexer.html: Lexer.nw
 	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
 
+Parser.grm: Parser.nw
+	$(NOTANGLE) $< $(CPIF) $@
+Parser.ltx: Parser.nw
+# Until we get icon
+#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
+	$(NOWEAVE) -index $< $(CPIF) $@
+Parser.html: Parser.nw
+	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
+
+Main.sml: Main.nw
+	$(NOTANGLE) $< $(CPIF) $@
+Main.ltx: Main.nw
+# Until we get icon
+#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
+	$(NOWEAVE) -index $< $(CPIF) $@
+Main.html: Main.nw
+	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
+
 ### DO NOT DELETE THIS LINE
-Lexer.ui: Parser.ui 
 Main.uo: Parser.ui Lexer.ui 
+Lexer.ui: Parser.ui Hasht.ui 
 Parser.uo: Parser.ui 
 Hasht.uo: Hasht.ui 
 Lexer.uo: Lexer.ui Parser.ui Hasht.ui 
