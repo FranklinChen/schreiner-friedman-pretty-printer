@@ -1,0 +1,48 @@
+% Main.nw is in -*-LaTeX-*-
+% For Main.sml
+
+\title{Main Driver for Compiler using [[mosmllex]] and [[mosmlyac]]}
+\author{Franklin Chen}
+
+\maketitle
+
+This is a driver that simply hooks up [[Lexer]] and [[Parser]].
+
+<<*>>=
+local open <<Modules to open>> in
+  <<Auxiliary definitions>>
+  val _ = <<Driver expression>>
+end
+@
+
+We want to do I/O.
+
+<<Modules to open>>=
+BasicIO
+Nonstdio
+@
+
+Create a lexer stream from an input stream.
+
+<<Auxiliary definitions>>=
+fun createLexerStream (is : instream) =
+  Lexing.createLexer (fn buff => fn n => Nonstdio.buff_input is buff 0 n)
+;
+@
+
+We call the parser just one time.
+
+<<Driver expression>>=
+let
+  val lexbuf = createLexerStream std_in
+in
+  Parser.program Lexer.Token lexbuf
+end
+;
+@
+
+\section{Indices}
+\subsection{Chunks}
+\nowebchunks
+\subsection{Identifiers}
+\nowebindex
