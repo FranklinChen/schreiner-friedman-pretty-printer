@@ -15,6 +15,7 @@ or [[flex]] for C.
 We begin by providing the desired signature.
 
 <<[[Lexer.sig]]>>=
+exception LexicalError of string * int * int;
 val Token : Lexing.lexbuf -> Parser.token;
 @
 
@@ -42,6 +43,17 @@ We need to access the tokens that [[Parser]] expects.
 <<Modules to open>>=
 open Parser;
 @
+
+We raise [[LexicalError]] with a message and two character numbers, if
+we run into a problem while lexing.
+
+<<Auxiliary definitions>>=
+exception LexicalError of string * int * int;
+
+fun lexerError lexbuf s = 
+  raise LexicalError (s, getLexemeStart lexbuf, getLexemeEnd lexbuf)
+;
+@ %def LexicalError lexerError
 
 We maintain a simple symbol table mapping [[string]]s to reserved word
 tokens.  A hash table implementation from module [[Hasht]] is used.
@@ -85,6 +97,7 @@ rule Token = parse
 | <<Constants>>
 | <<White space>>
 | <<End of file token>>
+| <<Illegal token>>
 @
 
 [FMC] We still need to properly handle line number adjustments.
@@ -138,12 +151,19 @@ the fixed table of keywords.
 @
 
 Only integer constants are currently supported.
-[FMC] We should check for error.
 
 <<Constants>>=
 [`0`-`9`]+
 {
-  Constant (valOf(Int.fromString(getLexeme lexbuf)))
+  let
+    val str = getLexeme lexbuf
+  in
+    case Int.fromString str of
+        NONE => lexerError
+                lexbuf
+                ("Failed to convert string \"" ^ str ^ "\" to integer")
+      | SOME i => Constant i
+  end
 }
 @
 
@@ -159,6 +179,17 @@ Skip blanks.
 
 <<End of file token>>=
 (eof) { EOF }
+@
+
+<<Illegal token>>=
+_
+{
+  lexerError
+  lexbuf
+  ("Illegal token \"" ^
+   (getLexeme lexbuf) ^
+   "\" in input")
+}
 @
 
 \section{Limitations}
