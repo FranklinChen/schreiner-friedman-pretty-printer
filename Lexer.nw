@@ -83,10 +83,11 @@ rule Token = parse
 | <<Fixed string tokens>>
 | <<Keywords and identifiers>>
 | <<Constants>>
+| <<White space>>
 | <<End of file token>>
 @
 
-FMC We still need to properly handle line number adjustments.
+[FMC] We still need to properly handle line number adjustments.
 
 <<Preprocessor info>>=
 `\n` "#" [`0`-`9`]+ ([` ` `\t`]+ _* )? `\n`
@@ -137,6 +138,7 @@ the fixed table of keywords.
 @
 
 Only integer constants are currently supported.
+[FMC] We should check for error.
 
 <<Constants>>=
 [`0`-`9`]+
@@ -146,7 +148,7 @@ Only integer constants are currently supported.
 @
 
 Skip blanks.
-FMC We really need to keep line number info.
+[FMC] We really need to keep line number info.
 
 <<White space>>=
 [` ` `\t` `\n`]+
@@ -159,6 +161,19 @@ FMC We really need to keep line number info.
 (eof) { EOF }
 @
 
+\section{Limitations}
+
+The [[#]] line/file directives, intended to be emitted by a
+preprocessor, are not lexed correctly in the case of its being the
+first line of input.
+
+Location information is not currently being maintained at all in the
+lexer.  Line number and column number information should ideally be
+kept up to date, for the purpose of error messages.  The line
+directives mentioned above should also adjust the line number
+information (and file information) appropriately.
+
+Anyway, error handling is also nonexistent.
 
 \section{Indices}
 \subsection{Chunks}
