@@ -21,7 +21,7 @@ val Token : Lexing.lexbuf -> Parser.token;
 
 \section{[[Lexer]] specification}
 
-The specification file has a well--defined format:
+The specification file has a well-defined format:
 
 <<*>>=
 {
@@ -223,3 +223,7 @@ Axel T. Schreiner and H. George Friedman, Jr.
 Prentice-Hall, Inc., New Jersey, 1985.
 
 \end{thebibliography}
+
+%%% Local Variables:
+%%% noweb-code-mode: sml-mode
+%%% End:

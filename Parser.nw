@@ -10,7 +10,7 @@ This is a parser for the project developed in \cite{Schreiner and
   Friedman}, done in [[mosmlyac]] for Moscow ML rather than in
 [[yacc]] for C.
 
-The specification file has a well--defined format:
+The specification file has a well-defined format:
 
 <<*>>=
 %{
@@ -122,7 +122,7 @@ The rest of the tokens do not need attributes.
 @ %def MM
 @ %def COMMA
 
-The usual end--of--file token.
+The usual end-of-file token.
 
 <<Tokens>>=
 %token EOF
@@ -160,7 +160,7 @@ We only have one entry point.
 @
 
 The other nonterminal types could be deduced, but we specify them
-explicitly anyway, as good self--documentation.
+explicitly anyway, as good self-documentation.
 
 <<Other nonterminal types>>=
 %type <unit> definitions
@@ -343,3 +343,7 @@ Axel T. Schreiner and H. George Friedman, Jr.
 Prentice-Hall, Inc., New Jersey, 1985.
 
 \end{thebibliography}
+
+%%% Local Variables:
+%%% noweb-code-mode: sml-mode
+%%% End:

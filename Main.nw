@@ -88,3 +88,7 @@ handle
 \nowebchunks
 \subsection{Identifiers}
 \nowebindex
+
+%%% Local Variables:
+%%% noweb-code-mode: sml-mode
+%%% End:
