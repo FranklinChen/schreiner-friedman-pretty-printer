@@ -25,7 +25,7 @@ The specification file has a well--defined format:
 
 \section{Header}
 
-FMC So far we have no header.
+[FMC] So far we have no header.
 
 <<Header>>=
 @
