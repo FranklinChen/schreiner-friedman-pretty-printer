@@ -2,7 +2,7 @@
 # Franklin Chen
 
 include Makefile.mosml
-include Makefile.nw
+include Makefile.noweb
 
 MOSMLYFLAGS = -v
 
