@@ -1,4 +1,4 @@
-% Lexer.nw
+% Lexer.nw is in -*-LaTeX-*-
 % For Lexer.lex
 
 \title{Lexer for Compiler in [[mosmllex]]}
@@ -20,6 +20,8 @@ The specification file has a well--defined format:
 ;
 @
  
+\section{Header}
+
 <<Header>>=
 <<Modules to open>>
 <<Auxiliary definitions>>
@@ -56,6 +58,8 @@ fun mkKeyword lexbuf =
   end
 ;
 @
+
+\section{Entry points}
 
 Now we present the entry points.  For now, we have only one.
 
@@ -128,8 +132,8 @@ Only integer constants are currently supported.
 [`0`-`9`]+
 {
   Constant (case Integer.fromString(getLexeme lexbuf) of
-		SOME i => i
-	      | _ => 0)
+                SOME i => i
+              | _ => 0)
 }
 @
 
@@ -146,6 +150,12 @@ FMC We really need to keep line number info.
 (eof) { EOF }
 @
 
+
+\section{Indices}
+\subsection{Chunks}
+\nowebchunks
+\subsection{Identifiers}
+\nowebindex
 
 \begin{thebibliography}{99}
 
