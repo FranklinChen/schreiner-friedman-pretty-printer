@@ -1,0 +1,160 @@
+% Lexer.nw
+% For Lexer.lex
+
+\title{Lexer for Compiler in [[mosmllex]]}
+\author{Franklin Chen}
+
+\maketitle
+
+This is a lexer for the project developed in \cite{Schreiner and
+Friedman}, done in [[mosmllex]] for Moscow ML rather than in [[lex]]
+or [[flex]] for C.
+
+The specification file has a well--defined format:
+
+<<*>>=
+{
+<<Header>>
+}
+<<Entry points>>
+;
+@
+ 
+<<Header>>=
+<<Modules to open>>
+<<Auxiliary definitions>>
+@
+
+We need to access the tokens that [[Parser]] expects.
+
+<<Modules to open>>=
+open Parser;
+@
+
+We maintain a simple symbol table mapping [[string]]s to reserved word
+tokens.  A hash table implementation from module [[Hasht]] is used.
+
+<<Auxiliary definitions>>=    
+val keyword_table = (Hasht.new 7 : (string,token) Hasht.t);
+
+val () =
+List.app (fn (str,tok) => Hasht.insert keyword_table str tok)
+[
+  ("break", BREAK),
+  ("continue", CONTINUE),
+  ("else", ELSE),
+  ("if", IF),
+  ("int", INT),
+  ("return", RETURN),
+  ("while", WHILE)
+];
+
+fun mkKeyword lexbuf =
+  let val s = getLexeme lexbuf in
+    Hasht.find keyword_table s
+    handle Subscript => Identifier s
+  end
+;
+@
+
+Now we present the entry points.  For now, we have only one.
+
+<<Entry points>>=
+rule Token = parse
+  <<Patterns and actions>>
+@
+
+<<Patterns and actions>>=
+  <<Preprocessor info>>
+| <<Fixed string tokens>>
+| <<Keywords and identifiers>>
+| <<Constants>>
+| <<End of file token>>
+@
+
+FMC We still need to properly handle line number adjustments.
+
+<<Preprocessor info>>=
+`\n` "#" [`0`-`9`]+ ([` ` `\t`]+ _* )? `\n`
+{
+  Token lexbuf
+}
+@
+
+<<Fixed string tokens>>=
+";" { SEMI }
+| "(" { LPAREN }
+| ")" { RPAREN }
+| "{" { LBRACE }
+| "}" { RBRACE }
+| "+" { PLUS }
+| "-" { MINUS }
+| "*" { TIMES }
+| "/" { DIVIDE }
+| "%" { REM }
+| ">" { GT }
+| "<" { LT }
+| ">=" { GE }
+| "<=" { LE }
+| "==" { EQ }
+| "!=" { NE }
+| "&" { AMP }
+| "^" { CARET }
+| "|" { BAR }
+| "=" { ASSIGN }
+| "+=" { PE }
+| "-=" { ME }
+| "*=" { TE }
+| "/=" { DE }
+| "%=" { RE }
+| "++" { PP }
+| "--" { MM }
+| "," { COMMA }
+@
+    
+Keywords are distinguished from identifiers by means of a lookup into
+the fixed table of keywords.
+
+<<Keywords and identifiers>>=
+[`A`-`Z` `a`-`z` `_`] [`A`-`Z` `a`-`z` `_` `0`-`9`]*
+{
+  mkKeyword lexbuf
+}
+@
+
+Only integer constants are currently supported.
+
+<<Constants>>=
+[`0`-`9`]+
+{
+  Constant (case Integer.fromString(getLexeme lexbuf) of
+		SOME i => i
+	      | _ => 0)
+}
+@
+
+FMC We really need to keep line number info.
+
+<<White space>>=
+[` ` `\t` `\n`]+
+{
+  Token lexbuf
+}
+@
+
+<<End of file token>>=
+(eof) { EOF }
+@
+
+
+\begin{thebibliography}{99}
+
+\bibitem{Schreiner and Friedman}
+Axel T. Schreiner and H. George Friedman, Jr.
+\emph{
+      Introduction to Compiler Construction with UNIX\footnote
+      {UNIX is a trademark of Bell Laboratories.}
+      }.
+Prentice-Hall, Inc., New Jersey, 1985.
+
+\end{thebibliography}
