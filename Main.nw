@@ -74,13 +74,47 @@ fun createLexerStream (is : instream) =
 @ %def createLexerStream
 
 <<Parse the lexer stream>>=
-Parser.program Lexer.Token lexbuf
-handle
-    (Lexer.LexicalError (str, num1, num2)) =>
-      fatal ("Lexer error [" ^
-             (Int.toString num1) ^ ", " ^
-             (Int.toString num2) ^ "]: " ^
-             str)
+parseMain Parser.program Lexer.Token lexbuf
+@
+
+We handle a parse error by outputting an error message.  There is no
+attempt at error recovery because [[mosmlyac]] does not provide
+convenient support for it.  We also catch lexical errors.  In either
+case, we simply die.
+
+<<Auxiliary definitions>>=
+fun parsePhrase parsingFun lexingFun lexbuf =
+  parsingFun lexingFun lexbuf
+  handle
+    Parsing.ParseError _ =>
+      let
+        val pos1 = Lexing.getLexemeStart lexbuf
+        val pos2 = Lexing.getLexemeEnd lexbuf
+      in
+        fatal ("Syntax error [" ^
+              (Int.toString pos1) ^ ", " ^
+              (Int.toString pos2) ^ "]")
+      end
+  | Lexer.LexicalError (str, num1, num2) =>
+    fatal ("Lexer error [" ^
+           (Int.toString num1) ^ ", " ^
+           (Int.toString num2) ^ "]: " ^
+           str)
+;
+@
+
+This is a wrapper to make sure we clean up the lexer and parser.
+
+<<Auxiliary definitions>>=
+fun parseMain parsingFun lexingFun lexbuf = 
+  let
+    val mainPhrase = parsePhrase parsingFun lexingFun lexbuf
+      handle x => (Parsing.clearParser(); raise x)
+  in
+    Parsing.clearParser();
+    mainPhrase
+  end
+;
 @
 
 \section{Indices}
