@@ -39,6 +39,8 @@ LIBOBJS = \
 	Parsing.uo \
 	Nonstdio.uo
 
+.PHONY: all doc install depend clean
+
 all: recog doc
 
 recog: $(SML_OBJS)
