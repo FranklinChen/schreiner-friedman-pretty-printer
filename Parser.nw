@@ -320,6 +320,12 @@ Empty trailer.
 @
 
 
+\section{Limitations}
+
+All the token types should really be augmented with position
+information passed by the lexer, in order to be able to generate
+informative error messages.
+
 \section{Indices}
 \subsection{Chunks}
 \nowebchunks
