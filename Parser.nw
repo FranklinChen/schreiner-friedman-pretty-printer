@@ -41,9 +41,16 @@ FMC So far we have no header.
 
 \subsection{Tokens}
 
+These are the only tokens with attributes.
+
 <<Tokens>>=
 %token <string> Identifier
 %token <int> Constant
+@ %def Identifier Constant
+
+The rest of the tokens do not need attributes.
+
+<<Tokens>>=
 %token INT
 %token IF
 %token ELSE
@@ -79,9 +86,49 @@ FMC So far we have no header.
 %token PP
 %token MM
 %token COMMA
+@ %def INT
+@ %def IF
+@ %def ELSE
+@ %def WHILE
+@ %def BREAK
+@ %def CONTINUE
+@ %def RETURN
+@ %def SEMI
+@ %def LPAREN
+@ %def RPAREN
+@ %def LBRACE
+@ %def RBRACE
+@ %def PLUS
+@ %def MINUS
+@ %def TIMES
+@ %def DIVIDE
+@ %def REM
+@ %def GT
+@ %def LT
+@ %def GE
+@ %def LE
+@ %def EQ
+@ %def NE
+@ %def AMP
+@ %def CARET
+@ %def BAR
+@ %def ASSIGN
+@ %def PE
+@ %def ME
+@ %def TE
+@ %def DE
+@ %def RE
+@ %def PP
+@ %def MM
+@ %def COMMA
 
+The usual end--of--file token.
+
+<<Tokens>>=
 %token EOF
-@
+@ %def EOF
+
+Precedences follow, from lowest to highest.
 
 <<Precedence>>=
 %right ASSIGN PE ME TE DE RE
@@ -93,7 +140,15 @@ FMC So far we have no header.
 %left PLUS MINUS
 %left TIMES DIVIDE REM
 %right PP MM
-@
+@ %def ASSIGN PE ME TE DE RE
+@ %def BAR
+@ %def CARET
+@ %def AMP
+@ %def EQ NE
+@ %def LT GT GE LE
+@ %def PLUS MINUS
+@ %def TIMES DIVIDE REM
+@ %def PP MM
 
 \subsection{Nonterminals}
 
@@ -103,6 +158,9 @@ We only have one entry point.
 %start program
 %type <unit> program
 @
+
+The other nonterminal types could be deduced, but we specify them
+explicitly anyway, as good self--documentation.
 
 <<Other nonterminal types>>=
 %type <unit> definitions
@@ -140,7 +198,9 @@ recognizer.
 <<Main entry point>>=
 program
         : definitions EOF { () }
-@
+@ %def program
+
+We will expand each of these later.
 
 <<Other rules>>=
 definitions
