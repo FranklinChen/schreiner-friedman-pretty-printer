@@ -426,10 +426,24 @@ tokens.
 <<Rules for dummy nonterminals>>=
 n_int: INT { Format.out "int\t" }
 n_identifier: Identifier { Format.out $1 }
+@ %def n_int
+@ %def n_identifier
+
+<<Rules for dummy nonterminals>>=
 n_lp: LPAREN { Format.out "(" }
 n_rp: RPAREN { Format.out ")" }
 n_co: COMMA { Format.out ", " }
+@ %def n_lp
+@ %def n_rp
+@ %def n_co
+
+<<Rules for dummy nonterminals>>=
 n_sc: SEMI { (Format.nl Format.AT) o (Format.out ";") }
+@
+%% FMC could not use because line too long
+%%@ %def n_sc
+
+<<Rules for dummy nonterminals>>=
 n_break: BREAK { Format.out "break" }
 n_continue: CONTINUE { Format.out "continue" }
 n_return: RETURN { Format.out "return" }
@@ -437,48 +451,31 @@ n_lr: LBRACE { (Format.at Format.IN) o
   (Format.out "{\t") o (Format.cond Format.EX) }
 n_rr: RBRACE { (Format.uncond Format.AT) o
   (Format.out "}") o (Format.at Format.EX) }
-n_if: IF { Format.out "if " }
-n_else: ELSE { (Format.cond Format.IN) o
-  (Format.out "else") o (Format.at Format.EX) }
-n_while: WHILE { Format.out "while " }
-n_constant: Constant { Format.out (Int.toString $1) }
-n_pp: PP { Format.out " ++ " }
-n_mm: MM { Format.out " -- " }
-n_pl: PLUS { Format.out " + " }
-n_mi: MINUS { Format.out " + " }
-n_mu: TIMES { Format.out " * " }
-n_di: DIVIDE { Format.out " / " }
-n_rm: REM { Format.out " % " }
-n_gt: GT { Format.out " > " }
-n_lt: LT { Format.out " < " }
-n_ge: GE { Format.out " >= " }
-n_le: LE { Format.out " <= " }
-n_eq: EQ { Format.out " == " }
-n_ne: NE { Format.out " != " }
-n_an: AMP { Format.out " & " }
-n_xo: CARET { Format.out " ^ " }
-n_or: BAR { Format.out " | " }
-n_as: ASSIGN { Format.out " = " }
-n_pe: PE { Format.out " += " }
-n_me: ME { Format.out " -= " }
-n_te: TE { Format.out " *= " }
-n_de: DE { Format.out " /= " }
-n_re: RE { Format.out " %= " }
-@ %def n_int
-@ %def n_identifier
-@ %def n_lp
-@ %def n_rp
-@ %def n_co
-@ %def n_sc
 @ %def n_break
 @ %def n_continue
 @ %def n_return
 @ %def n_lr
 @ %def n_rr
+
+<<Rules for dummy nonterminals>>=
+n_if: IF { Format.out "if " }
+n_else: ELSE { (Format.cond Format.IN) o
+  (Format.out "else") o (Format.at Format.EX) }
+n_while: WHILE { Format.out "while " }
+n_constant: Constant { Format.out (Int.toString $1) }
 @ %def n_if
 @ %def n_else
 @ %def n_while
 @ %def n_constant
+
+<<Rules for dummy nonterminals>>=
+n_pp: PP { Format.out " ++ " }
+n_mm: MM { Format.out " -- " }
+n_pl: PLUS { Format.out " + " }
+n_mi: MINUS { Format.out " - " }
+n_mu: TIMES { Format.out " * " }
+n_di: DIVIDE { Format.out " / " }
+n_rm: REM { Format.out " % " }
 @ %def n_pp
 @ %def n_mm
 @ %def n_pl
@@ -486,15 +483,36 @@ n_re: RE { Format.out " %= " }
 @ %def n_mu
 @ %def n_di
 @ %def n_rm
+
+<<Rules for dummy nonterminals>>=
+n_gt: GT { Format.out " > " }
+n_lt: LT { Format.out " < " }
+n_ge: GE { Format.out " >= " }
+n_le: LE { Format.out " <= " }
+n_eq: EQ { Format.out " == " }
+n_ne: NE { Format.out " != " }
 @ %def n_gt
 @ %def n_lt
 @ %def n_ge
 @ %def n_le
 @ %def n_eq
 @ %def n_ne
+
+<<Rules for dummy nonterminals>>=
+n_an: AMP { Format.out " & " }
+n_xo: CARET { Format.out " ^ " }
+n_or: BAR { Format.out " | " }
 @ %def n_an
 @ %def n_xo
 @ %def n_or
+
+<<Rules for dummy nonterminals>>=
+n_as: ASSIGN { Format.out " = " }
+n_pe: PE { Format.out " += " }
+n_me: ME { Format.out " -= " }
+n_te: TE { Format.out " *= " }
+n_de: DE { Format.out " /= " }
+n_re: RE { Format.out " %= " }
 @ %def n_as
 @ %def n_pe
 @ %def n_me
