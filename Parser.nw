@@ -191,8 +191,8 @@ Note that for now, everything returns [[()]] because we only have a
 recognizer.
 
 <<Rules>>=
-  <<Main entry point>>
-  <<Other rules>>
+<<Main entry point>>
+<<Other rules>>
 @
 
 <<Main entry point>>=
@@ -203,56 +203,105 @@ program
 We will expand each of these later.
 
 <<Other rules>>=
+<<[[definitions]]>>
+<<[[definition]]>>
+<<[[function_definition]]>>
+<<[[optional_parameter_list]]>>
+<<[[parameter_list]]>>
+<<[[parameter_declarations]]>>
+<<[[parameter_declaration]]>>
+<<[[parameter_declarator_list]]>>
+<<[[compound_statement]]>>
+<<[[declarations]]>>
+<<[[declaration]]>>
+<<[[declarator_list]]>>
+<<[[statements]]>>
+<<[[statement]]>>
+<<[[if_prefix]]>>
+<<[[loop_prefix]]>>
+<<[[expression]]>>
+<<[[binary]]>>
+<<[[optional_argument_list]]>>
+<<[[argument_list]]>>
+@
+
+<<[[definitions]]>>=
 definitions
         : definition { () }
         | definitions definition { () }
+@ %def definitions
 
+<<[[definition]]>>=
 definition
         : function_definition { () }
         | INT function_definition { () }
         | declaration { () }
+@ %def definition
 
+<<[[function_definition]]>>=
 function_definition
         : Identifier LPAREN optional_parameter_list RPAREN
           parameter_declarations compound_statement { () }
+@ %def function_definition
 
+<<[[optional_parameter_list]]>>=
 optional_parameter_list
         : /* no formal parameters */ { () }
         | parameter_list { () }
+@ %def optional_parameter_list
 
+<<[[parameter_list]]>>=
 parameter_list
         : Identifier { () }
         | parameter_list COMMA Identifier { () }
+@ %def parameter_list
 
+<<[[parameter_declarations]]>>=
 parameter_declarations
         : /* null */ { () }
         | parameter_declarations parameter_declaration { () }
+@ %def parameter_declarations
 
+<<[[parameter_declaration]]>>=
 parameter_declaration
         : INT parameter_declarator_list SEMI { () }
+@ %def parameter_declaration
 
+<<[[parameter_declarator_list]]>>=
 parameter_declarator_list
         : Identifier { () }
         | parameter_declarator_list COMMA Identifier { () }
+@ %def parameter_declarator_list
 
+<<[[compound_statement]]>>=
 compound_statement
         : LBRACE declarations statements RBRACE { () }
+@ %def compound_statement
 
+<<[[declarations]]>>=
 declarations
         : /* null */ { () }
         | declarations declaration { () }
+@ %def declarations
 
+<<[[declaration]]>>=
 declaration
         : INT declarator_list SEMI { () }
+@ %def declaration
 
+<<[[declarator_list]]>>=
 declarator_list
         : Identifier { () }
         | declarator_list COMMA Identifier { () }
+@ %def declarator_list
 
+<<[[statements]]>>=
 statements
         : /* null */ { () }
         | statements statement { () }
+@ %def statements
 
+<<[[statement]]>>=
 statement
         : expression SEMI { () }
         | SEMI  /* null statement */ { () }
@@ -264,17 +313,25 @@ statement
         | if_prefix statement { () }
         | if_prefix statement ELSE statement { () }
         | loop_prefix statement { () }
+@ %def statement
 
+<<[[if_prefix]]>>=
 if_prefix
         : IF LPAREN expression RPAREN { () }
+@ %def if_prefix
 
+<<[[loop_prefix]]>>=
 loop_prefix
         : WHILE LPAREN expression RPAREN { () }
+@ %def loop_prefix
 
+<<[[expression]]>>=
 expression
         : binary { () }
         | expression COMMA binary { () }
+@ %def expression
 
+<<[[binary]]>>=
 binary
         : Identifier { () }
         | Constant { () }
@@ -302,15 +359,19 @@ binary
         | Identifier TE binary { () }
         | Identifier DE binary { () }
         | Identifier RE binary { () }
+@ %def binary
 
+<<[[optional_argument_list]]>>=
 optional_argument_list
         : /* no actual arguments */ { () }
         | argument_list { () }
+@ %def optional_argument_list
 
+<<[[argument_list]]>>=
 argument_list
         : binary { () }
         | argument_list COMMA binary { () }
-@
+@ %def argument_list
 
 \section{Trailer}
 
