@@ -37,7 +37,14 @@ LIBOBJS = \
 	Obj.uo \
 	Lexing.uo \
 	Parsing.uo \
-	Nonstdio.uo
+	Nonstdio.uo \
+	Substring.uo \
+	Path.uo \
+	Time.uo \
+	OS.uo \
+	FileSys.uo \
+	Timer.uo \
+	Mosml.uo
 
 .PHONY: all doc install depend clean
 
