@@ -9,6 +9,7 @@ MOSMLYFLAGS = -v
 SRC = \
 	Lexer.nw \
 	Parser.nw \
+	Format.nw \
 	Hasht.sml Hasht.sig \
 	Main.nw
 
@@ -16,11 +17,13 @@ SRC = \
 SML_SRC = \
 	Lexer.sml Lexer.sig \
 	Parser.sml Parser.sig \
+	Format.sml Format.sig \
 	Hasht.sml Hasht.sig \
 	Main.sml
 
 SML_OBJS = \
 	Hasht.uo \
+	Format.uo \
 	Parser.uo \
 	Lexer.uo \
 	Main.uo
@@ -48,12 +51,12 @@ LIBOBJS = \
 
 .PHONY: all doc install depend clean
 
-all: recog doc
+all: fmt doc
 
-recog: $(SML_OBJS)
+fmt: $(SML_OBJS)
 	$(MOSMLLD) $(MOSMLLDFLAGS) -o $@ $(LIBOBJS) $(SML_OBJS)
 
-doc: Lexer.dvi Parser.dvi Main.dvi
+doc: Lexer.dvi Parser.dvi Format.dvi Main.dvi
 
 install:
 
@@ -87,6 +90,17 @@ Parser.ltx: Parser.nw
 Parser.html: Parser.nw
 	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
 
+Format.sig: Format.nw
+	$(NOTANGLE) -R"[[$@]]" $< $(CPIF) $@
+Format.sml: Format.nw
+	$(NOTANGLE) $< $(CPIF) $@
+Format.ltx: Format.nw
+# Until we get icon
+#	$(NOWEAVE) -index -autodefs sml $< $(CPIF) $@
+	$(NOWEAVE) -index $< $(CPIF) $@
+Format.html: Format.nw
+	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
+
 Main.sml: Main.nw
 	$(NOTANGLE) $< $(CPIF) $@
 Main.ltx: Main.nw
@@ -97,8 +111,10 @@ Main.html: Main.nw
 	$(NOWEAVE) -filter l2h -index -autodefs sml -html $< $(CPIF) $@
 
 ### DO NOT DELETE THIS LINE
-Main.uo: Parser.ui Lexer.ui 
-Lexer.ui: Parser.ui Hasht.ui 
-Parser.uo: Parser.ui 
-Hasht.uo: Hasht.ui 
+Format.uo: Format.ui 
+Main.uo: Parser.ui Lexer.ui Format.ui 
+Lexer.ui: Parser.ui 
 Lexer.uo: Lexer.ui Parser.ui Hasht.ui 
+Parser.ui: Format.ui 
+Parser.uo: Parser.ui Format.ui 
+Hasht.uo: Hasht.ui 
