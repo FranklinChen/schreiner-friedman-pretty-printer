@@ -11,34 +11,70 @@ This is a driver that simply hooks up [[Lexer]] and [[Parser]].
 <<*>>=
 local open <<Modules to open>> in
   <<Auxiliary definitions>>
-  val _ = <<Driver expression>>
+  <<Definition of [[main]]>>
+  val _ = main ()
 end
 @
 
-We want to do I/O.
+We want to do I/O.  Use the old [[BasicIO]] interface because that's
+what [[Lexing]] currently hooks up with, unfortunately.
 
 <<Modules to open>>=
 BasicIO
 Nonstdio
 @
 
-Create a lexer stream from an input stream.
+[[main]] parses the command line to determine what input stream to
+compile from, then spawns off the compile.
+
+<<Definition of [[main]]>>=
+fun main () =
+let
+  val argv = Mosml.argv ()
+  val is = <<Open the indicated input stream>>
+  val lexbuf = <<Create the lexer stream>>
+in
+  <<Parse the lexer stream>>
+end
+@ %def argv is lexbuf main
+
+Determine the input stream to open based on the command line.  We will
+accept either no arguments, indicating standard input is to be read,
+or one argument, indicating a named file is to be read.
+
+[FMC] We currently have no way of transparently opening up a pipe to
+the C preprocessor, which was the interface in the original C program.
+
+<<Open the indicated input stream>>=
+(case argv of
+    [_] => std_in
+  | [_, name] => (open_in name
+                  handle (SysErr _) =>
+                    fatal ("Failed to open " ^ name))
+  | arg0::_ => fatal ("Usage: " ^ arg0 ^ " [file]")
+)
+@
+
+<<Auxiliary definitions>>=
+fun fatal s =
+(
+  output(std_err, s ^ "\n");
+  exit 1
+)
+@ %def fatal
+
+<<Create the lexer stream>>=
+createLexerStream is
+@
 
 <<Auxiliary definitions>>=
 fun createLexerStream (is : instream) =
-  Lexing.createLexer (fn buff => fn n => Nonstdio.buff_input is buff 0 n)
-;
-@
+  Lexing.createLexer
+  (fn buff => fn n => Nonstdio.buff_input is buff 0 n)
+@ %def createLexerStream
 
-We call the parser just one time.
-
-<<Driver expression>>=
-let
-  val lexbuf = createLexerStream std_in
-in
-  Parser.program Lexer.Token lexbuf
-end
-;
+<<Parse the lexer stream>>=
+Parser.program Lexer.Token lexbuf
 @
 
 \section{Indices}
