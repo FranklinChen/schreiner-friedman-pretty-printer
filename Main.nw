@@ -33,8 +33,10 @@ let
   val argv = Mosml.argv ()
   val is = <<Open the indicated input stream>>
   val lexbuf = <<Create the lexer stream>>
+  val formatAction = <<Parse the lexer stream>>
+  val action = Format.create();
 in
-  <<Parse the lexer stream>>
+  formatAction action
 end
 @ %def argv is lexbuf main
 
