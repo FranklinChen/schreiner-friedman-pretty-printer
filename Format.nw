@@ -1,0 +1,164 @@
+% Format.nw
+% For Format.sig, Format.sml
+
+\title{Formatter}
+\author{Franklin Chen}
+\date{July 28, 1996}
+
+\maketitle
+
+This module provides the support needed for the pretty-printing
+program.
+
+\section{[[Format]] signature}
+
+We begin by providing the desired signature.  Whereas \cite{Schreiner
+and Friedman} implement their corresponding C module as functions
+modifying the state of variables in static scope, we pass around the
+formatting information explicitly from the parser actions.
+
+Warning: this module is still not referentially transparent, as output
+to standard output is immediately performed.
+
+<<[[Format.sig]]>>=
+type info
+
+datatype margin = IN                    (* inward *)
+  | EX                                  (* outward *)
+  | AT                                  (* as is *)
+
+type action = info -> info
+  
+(* Constructor *)
+val create : unit -> info
+val unitAction : action
+
+val nl : margin -> action
+val out : string -> action
+
+val at : margin -> action
+val cond : margin -> action
+val uncond : margin -> action
+@
+
+\section{[[Format]] implementation}
+
+<<*>>=
+local open <<Modules to open>> in
+  <<Type definitions>>
+  <<Variable definitions>>
+end
+@
+
+<<Modules to open>>=
+BasicIO
+@
+
+Start with the abstract data type [[info]] that holds all the
+state information.
+
+<<Type definitions>>=
+type info =
+  int *                                 (* left margin, in tabs *)
+  bool *                                (* are we at left margin? *)
+  int *                                 (* managed by cond *)
+  int                                   (* managed by uncond *)
+             
+datatype margin = IN                    (* inward *)
+  | EX                                  (* outward *)
+  | AT                                  (* as is *)
+
+
+type action = info -> info
+@ %def info margin action
+
+
+The constructor returns an initialized [[info]] suitable for the
+beginning of processing a source file.
+
+<<Variable definitions>>=
+fun create () = (0, true, 0, 0)
+@ %def create
+
+<<Variable definitions>>=
+fun unitAction i = i
+@ %def unitAction
+
+Adjust [[lmargin]] only.
+
+<<Variable definitions>>=
+fun at AT i = i
+  | at IN (lmargin, atmargin, condflag, uncdflag) =
+    (lmargin+1, atmargin, condflag, uncdflag)
+  | at EX (lmargin, atmargin, condflag, uncdflag) =
+    (lmargin-1, atmargin, condflag, uncdflag)
+@ %def at
+
+<<Variable definitions>>=
+and cond IN (lmargin, atmargin, condflag, uncdflag) =
+  nl IN (lmargin, atmargin, condflag + 1, uncdflag)
+  | cond EX (i as (_, _, 0, _)) = i
+  | cond EX (i as (lmargin, atmargin, _, uncdflag)) =
+  let
+    val (lmargin', atmargin', condflag', uncdflag') = at EX i
+  in
+    (lmargin', atmargin', 0, uncdflag')
+  end
+@ %def cond
+
+
+<<Variable definitions>>=
+and uncond AT (lmargin, atmargin, condflag, uncdflag) =
+  nl AT (lmargin, atmargin, condflag, uncdflag + 1)
+  | uncond EX (i as (_, _, _, 0)) = at EX i
+  | uncond EX i = i
+@ %def uncond
+
+<<Variable definitions>>=
+and nl delta (i as (lmargin, atmargin, condflag, uncdflag)) =
+  let
+    val (lmargin', _, condflag', uncdflag') = at delta i
+  in
+    output(std_out, "\n");
+    (lmargin', true, condflag', uncdflag')
+  end
+@ %def nl
+
+<<Variable definitions>>=
+and out s (i as (lmargin, atmargin, _, _)) =
+  (
+   if atmargin then
+     let
+       fun rep 0 = ()
+         | rep n = (output(std_out, "\t"); rep (n-1))
+     in
+       rep lmargin
+     end
+   else
+     ();
+   output(std_out, s);
+   (lmargin, false, 0, 0)
+   )
+@ %def out
+
+\section{Indices}
+\subsection{Chunks}
+\nowebchunks
+\subsection{Identifiers}
+\nowebindex
+
+\begin{thebibliography}{99}
+
+\bibitem{Schreiner and Friedman}
+Axel T. Schreiner and H. George Friedman, Jr.
+\emph{
+      Introduction to Compiler Construction with UNIX\footnote
+      {UNIX is a trademark of Bell Laboratories.}
+      }.
+Prentice-Hall, Inc., New Jersey, 1985.
+
+\end{thebibliography}
+
+%%% Local Variables:
+%%% noweb-code-mode: sml-mode
+%%% End:
