@@ -1,0 +1,156 @@
+<!-- this file was generated automatically by noweave; better not edit it-->
+<html><head><title>Main.nw</title></head><body><!-- Main.nw-->
+<!-- For Main.sml-->
+
+<h1><a name="NWDnTx0k-1">Main Driver for Compiler using </a><code>mosmllex</code> and <code>mosmlyac</code></h1>
+<address>Franklin Chen</address>
+<b>July 28, 1996</b>
+<p>
+<!--title goes here-->
+This is a driver that simply hooks up <code>Lexer</code> and <code>Parser</code>.
+<p>
+<pre><a name="NWnTx0k-1p0Y9w-1" href="#NWDnTx0k-1"><dfn>&lt;*&gt;=</dfn></a>
+local open <a name="NWnTx0k-1p0Y9w-1-u1" href="#NWDnTx0k-2"><i>&lt;Modules to open&gt;</i></a> in
+  <a name="NWnTx0k-1p0Y9w-1-u2" href="#NWnTx0k-18JhAs-1"><i>&lt;Auxiliary definitions&gt;</i></a>
+  <a name="NWnTx0k-1p0Y9w-1-u3" href="#NWDnTx0k-3"><i>&lt;Definition of <code>main</code>&gt;</i></a>
+  val _ = <a href="#NWDnTx0k-3">main</a> ()
+end
+</pre><p>
+
+<a name="NWDnTx0k-2">We want to do I/O.  Use the old </a><code>BasicIO</code> interface because that's
+what <code>Lexing</code> currently hooks up with, unfortunately.
+<p>
+<pre><a name="NWnTx0k-2T4p7r-1" href="#NWDnTx0k-2"><dfn>&lt;Modules to open&gt;=</dfn></a> <b>(<a href="#NWDnTx0k-1">&lt;-U</a>)</b>
+BasicIO
+Nonstdio
+</pre><p>
+
+<code><a name="NWDnTx0k-3" href="#NWDnTx0k-3">main</a></code> parses the command line to determine what input stream to
+compile from, then spawns off the compile.
+<p>
+<pre><a name="NWnTx0k-NK1XN-1" href="#NWDnTx0k-3"><dfn>&lt;Definition of <code>main</code>&gt;=</dfn></a> <b>(<a href="#NWDnTx0k-1">&lt;-U</a>)</b>
+fun <a href="#NWDnTx0k-3">main</a> () =
+let
+  val <a href="#NWDnTx0k-3">argv</a> = Mosml.<a href="#NWDnTx0k-3">argv</a> ()
+  val <a href="#NWDnTx0k-3">is</a> = <a name="NWnTx0k-NK1XN-1-u1" href="#NWDnTx0k-4"><i>&lt;Open the indicated input stream&gt;</i></a>
+  val <a href="#NWDnTx0k-3">lexbuf</a> = <a name="NWnTx0k-NK1XN-1-u2" href="#NWnTx0k-1Lqmpp-1"><i>&lt;Create the lexer stream&gt;</i></a>
+  val <a href="#NWDnTx0k-3">formatAction</a> = <a name="NWnTx0k-NK1XN-1-u3" href="#NWnTx0k-sLIvC-1"><i>&lt;Parse the lexer stream&gt;</i></a>
+  val <a href="#NWDnTx0k-3">action</a> = Format.create();
+in
+  <a href="#NWDnTx0k-3">formatAction</a> <a href="#NWDnTx0k-3">action</a>
+end
+</pre><blockquote>Defines <a href="#NWI-action"><code>action</code></a>, <a href="#NWI-argv"><code>argv</code></a>, <a href="#NWI-formatAction"><code>formatAction</code></a>, <a href="#NWI-is"><code>is</code></a>, <a href="#NWI-lexbuf"><code>lexbuf</code></a>, <a href="#NWI-main"><code>main</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDnTx0k-4">Determine the input stream to open based on the command line.  We will</a>
+accept either no arguments, indicating standard input is to be read,
+or one argument, indicating a named file is to be read.
+<p>
+[FMC] We currently have no way of transparently opening up a pipe to
+the C preprocessor, which was the interface in the original C program.
+<p>
+<pre><a name="NWnTx0k-1IztUb-1" href="#NWDnTx0k-4"><dfn>&lt;Open the indicated input stream&gt;=</dfn></a> <b>(<a href="#NWDnTx0k-3">U-&gt;</a>)</b>
+(case <a href="#NWDnTx0k-3">argv</a> of
+    [_] =&gt; std_in
+  | [_, name] =&gt; (open_in name
+                  handle (SysErr _) =&gt;
+                    <a href="#NWnTx0k-18JhAs-1">fatal</a> (&quot;Failed to open &quot; ^ name))
+  | arg0::_ =&gt; <a href="#NWnTx0k-18JhAs-1">fatal</a> (&quot;Usage: &quot; ^ arg0 ^ &quot; [file]&quot;)
+)
+</pre><p>
+
+<pre><a name="NWnTx0k-18JhAs-1" href="#NWnTx0k-18JhAs-1"><dfn>&lt;Auxiliary definitions&gt;=</dfn></a> <b>(<a href="#NWDnTx0k-1">&lt;-U</a>)</b> <b>[D<a href="#NWnTx0k-18JhAs-2">-&gt;</a>]</b>
+fun <a href="#NWnTx0k-18JhAs-1">fatal</a> s =
+(
+  output(std_err, s ^ &quot;\n&quot;);
+  exit 1
+)
+</pre><blockquote>Defines <a href="#NWI-fatal"><code>fatal</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWnTx0k-1Lqmpp-1" href="#NWnTx0k-1Lqmpp-1"><dfn>&lt;Create the lexer stream&gt;=</dfn></a> <b>(<a href="#NWDnTx0k-3">U-&gt;</a>)</b>
+<a href="#NWnTx0k-18JhAs-2">createLexerStream</a> <a href="#NWDnTx0k-3">is</a>
+</pre><p>
+
+<pre><a name="NWnTx0k-18JhAs-2" href="#NWnTx0k-18JhAs-1"><dfn>&lt;Auxiliary definitions&gt;+=</dfn></a> <b>(<a href="#NWDnTx0k-1">&lt;-U</a>)</b> <b>[<a href="#NWnTx0k-18JhAs-1">&lt;-</a>D<a href="#NWDnTx0k-5">-&gt;</a>]</b>
+fun <a href="#NWnTx0k-18JhAs-2">createLexerStream</a> (<a href="#NWDnTx0k-3">is</a> : instream) =
+  Lexing.createLexer
+  (fn buff =&gt; fn n =&gt; Nonstdio.buff_input <a href="#NWDnTx0k-3">is</a> buff 0 n)
+</pre><blockquote>Defines <a href="#NWI-createLexerStream"><code>createLexerStream</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWnTx0k-sLIvC-1" href="#NWnTx0k-sLIvC-1"><dfn>&lt;Parse the lexer stream&gt;=</dfn></a> <b>(<a href="#NWDnTx0k-3">U-&gt;</a>)</b>
+<a href="#NWDnTx0k-6">parseMain</a> Parser.program Lexer.Token <a href="#NWDnTx0k-3">lexbuf</a>
+</pre><p>
+
+<a name="NWDnTx0k-5">We handle a parse error by outputting an error message.  There is no</a>
+attempt at error recovery because <code>mosmlyac</code> does not provide
+convenient support for it.  We also catch lexical errors.  In either
+case, we simply die.
+<p>
+<pre><a name="NWnTx0k-18JhAs-3" href="#NWnTx0k-18JhAs-1"><dfn>&lt;Auxiliary definitions&gt;+=</dfn></a> <b>(<a href="#NWDnTx0k-1">&lt;-U</a>)</b> <b>[<a href="#NWnTx0k-18JhAs-2">&lt;-</a>D<a href="#NWDnTx0k-6">-&gt;</a>]</b>
+fun <a href="#NWDnTx0k-5">parsePhrase</a> parsingFun lexingFun <a href="#NWDnTx0k-3">lexbuf</a> =
+  parsingFun lexingFun <a href="#NWDnTx0k-3">lexbuf</a>
+  handle
+    Parsing.ParseError _ =&gt;
+      let
+        val pos1 = Lexing.getLexemeStart <a href="#NWDnTx0k-3">lexbuf</a>
+        val pos2 = Lexing.getLexemeEnd <a href="#NWDnTx0k-3">lexbuf</a>
+      in
+        <a href="#NWnTx0k-18JhAs-1">fatal</a> (&quot;Syntax error [&quot; ^
+              (Int.toString pos1) ^ &quot;, &quot; ^
+              (Int.toString pos2) ^ &quot;]&quot;)
+      end
+  | Lexer.LexicalError (str, num1, num2) =&gt;
+    <a href="#NWnTx0k-18JhAs-1">fatal</a> (&quot;Lexer error [&quot; ^
+           (Int.toString num1) ^ &quot;, &quot; ^
+           (Int.toString num2) ^ &quot;]: &quot; ^
+           str)
+;
+</pre><blockquote>Defines <a href="#NWI-parsePhrase"><code>parsePhrase</code></a> (links are to index).<p>
+</blockquote><p>
+
+<a name="NWDnTx0k-6">This is a wrapper to make sure we clean up the lexer and parser.</a>
+<p>
+<pre><a name="NWnTx0k-18JhAs-4" href="#NWnTx0k-18JhAs-1"><dfn>&lt;Auxiliary definitions&gt;+=</dfn></a> <b>(<a href="#NWDnTx0k-1">&lt;-U</a>)</b> <b>[<a href="#NWDnTx0k-5">&lt;-</a>D]</b>
+fun <a href="#NWDnTx0k-6">parseMain</a> parsingFun lexingFun <a href="#NWDnTx0k-3">lexbuf</a> = 
+  let
+    val mainPhrase = <a href="#NWDnTx0k-5">parsePhrase</a> parsingFun lexingFun <a href="#NWDnTx0k-3">lexbuf</a>
+      handle x =&gt; (Parsing.clearParser(); raise x)
+  in
+    Parsing.clearParser();
+    mainPhrase
+  end
+;
+</pre><blockquote>Defines <a href="#NWI-parseMain"><code>parseMain</code></a> (links are to index).<p>
+</blockquote><p>
+
+<h2><a name="NWDnTx0k-7">Indices</a></h2>
+<h3>Chunks</h3>
+<ul>
+<li><a href="#NWDnTx0k-1"><i>&lt;*&gt;</i></a>: <a href="#NWDnTx0k-1">D1</a>
+<li><a href="#NWnTx0k-18JhAs-1"><i>&lt;Auxiliary definitions&gt;</i></a>: <a href="#NWDnTx0k-1">U1</a>, <a href="#NWnTx0k-18JhAs-1">D2</a>, <a href="#NWnTx0k-18JhAs-2">D3</a>, <a href="#NWDnTx0k-5">D4</a>, <a href="#NWDnTx0k-6">D5</a>
+<li><a href="#NWnTx0k-1Lqmpp-1"><i>&lt;Create the lexer stream&gt;</i></a>: <a href="#NWDnTx0k-3">U1</a>, <a href="#NWnTx0k-1Lqmpp-1">D2</a>
+<li><a href="#NWDnTx0k-3"><i>&lt;Definition of <code>main</code>&gt;</i></a>: <a href="#NWDnTx0k-1">U1</a>, <a href="#NWDnTx0k-3">D2</a>
+<li><a href="#NWDnTx0k-2"><i>&lt;Modules to open&gt;</i></a>: <a href="#NWDnTx0k-1">U1</a>, <a href="#NWDnTx0k-2">D2</a>
+<li><a href="#NWDnTx0k-4"><i>&lt;Open the indicated input stream&gt;</i></a>: <a href="#NWDnTx0k-3">U1</a>, <a href="#NWDnTx0k-4">D2</a>
+<li><a href="#NWnTx0k-sLIvC-1"><i>&lt;Parse the lexer stream&gt;</i></a>: <a href="#NWDnTx0k-3">U1</a>, <a href="#NWnTx0k-sLIvC-1">D2</a>
+</ul>
+<h3>Identifiers</h3>
+<ul>
+<li><a name="NWI-action" href="#NWDnTx0k-3">action</a>: <a href="#NWDnTx0k-3">D1</a>
+<li><a name="NWI-argv" href="#NWDnTx0k-3">argv</a>: <a href="#NWDnTx0k-3">D1</a>, <a href="#NWDnTx0k-4">U2</a>
+<li><a name="NWI-createLexerStream" href="#NWnTx0k-18JhAs-2">createLexerStream</a>: <a href="#NWnTx0k-1Lqmpp-1">U1</a>, <a href="#NWnTx0k-18JhAs-2">D2</a>
+<li><a name="NWI-fatal" href="#NWnTx0k-18JhAs-1">fatal</a>: <a href="#NWDnTx0k-4">U1</a>, <a href="#NWnTx0k-18JhAs-1">D2</a>, <a href="#NWDnTx0k-5">U3</a>
+<li><a name="NWI-formatAction" href="#NWDnTx0k-3">formatAction</a>: <a href="#NWDnTx0k-3">D1</a>
+<li><a name="NWI-is" href="#NWDnTx0k-3">is</a>: <a href="#NWDnTx0k-3">D1</a>, <a href="#NWnTx0k-1Lqmpp-1">U2</a>, <a href="#NWnTx0k-18JhAs-2">U3</a>
+<li><a name="NWI-lexbuf" href="#NWDnTx0k-3">lexbuf</a>: <a href="#NWDnTx0k-3">D1</a>, <a href="#NWnTx0k-sLIvC-1">U2</a>, <a href="#NWDnTx0k-5">U3</a>, <a href="#NWDnTx0k-6">U4</a>
+<li><a name="NWI-main" href="#NWDnTx0k-3">main</a>: <a href="#NWDnTx0k-1">U1</a>, <a href="#NWDnTx0k-3">D2</a>
+<li><a name="NWI-parseMain" href="#NWDnTx0k-6">parseMain</a>: <a href="#NWnTx0k-sLIvC-1">U1</a>, <a href="#NWDnTx0k-6">D2</a>
+<li><a name="NWI-parsePhrase" href="#NWDnTx0k-5">parsePhrase</a>: <a href="#NWDnTx0k-5">D1</a>, <a href="#NWDnTx0k-6">U2</a>
+</ul>
+<p>
+<!--%% Local Variables:-->
+<!--%% noweb-code-mode: sml-mode-->
+<!--%% End:-->
+
+
+</body></html>
+

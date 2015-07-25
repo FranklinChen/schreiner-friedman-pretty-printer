@@ -1,0 +1,185 @@
+<!-- this file was generated automatically by noweave; better not edit it-->
+<html><head><title>Format.nw</title></head><body><!-- Format.nw-->
+<!-- For Format.sig, Format.sml-->
+
+<h1>Formatter</h1>
+<address>Franklin Chen</address>
+<b>July 28, 1996</b>
+<p>
+<!--title goes here-->
+This module provides the support needed for the pretty-printing
+program.
+<p>
+<h2><code>Format</code> signature</h2>
+<p>
+<a name="NWDRDL5J-1">We begin by providing the desired signature.  Whereas </a><b>[cite&nbsp;<a href="#NWcite-{">{</a>]</b>Schreiner
+and Friedman implement their corresponding C module as functions
+modifying the state of variables in static scope, we pass around the
+formatting information explicitly from the parser actions.
+<p>
+Warning: this module is still not referentially transparent, as output
+to standard output is immediately performed.
+<p>
+<pre><a name="NWRDL5J-10IUpJ-1" href="#NWDRDL5J-1"><dfn>&lt;<code>Format.sig</code>&gt;=</dfn></a>
+type <a href="#NWDRDL5J-1">info</a>
+
+datatype <a href="#NWDRDL5J-1">margin</a> = IN                    (* inward *)
+  | EX                                  (* outward *)
+  | AT                                  (* as is *)
+
+type <a href="#NWDRDL5J-1">action</a> = <a href="#NWDRDL5J-1">info</a> -&gt; <a href="#NWDRDL5J-1">info</a>
+  
+(* Constructor *)
+val <a href="#NWDRDL5J-1">create</a> : unit -&gt; <a href="#NWDRDL5J-1">info</a>
+val <a href="#NWDRDL5J-1">unitAction</a> : <a href="#NWDRDL5J-1">action</a>
+
+val <a href="#NWDRDL5J-1">nl</a> : <a href="#NWDRDL5J-1">margin</a> -&gt; <a href="#NWDRDL5J-1">action</a>
+val <a href="#NWDRDL5J-1">out</a> : string -&gt; <a href="#NWDRDL5J-1">action</a>
+
+val <a href="#NWDRDL5J-1">at</a> : <a href="#NWDRDL5J-1">margin</a> -&gt; <a href="#NWDRDL5J-1">action</a>
+val <a href="#NWDRDL5J-1">cond</a> : <a href="#NWDRDL5J-1">margin</a> -&gt; <a href="#NWDRDL5J-1">action</a>
+val <a href="#NWDRDL5J-1">uncond</a> : <a href="#NWDRDL5J-1">margin</a> -&gt; <a href="#NWDRDL5J-1">action</a>
+</pre><blockquote>Defines <a href="#NWI-action"><code>action</code></a>, <a href="#NWI-at"><code>at</code></a>, <a href="#NWI-cond"><code>cond</code></a>, <a href="#NWI-create"><code>create</code></a>, <a href="#NWI-info"><code>info</code></a>, <a href="#NWI-margin"><code>margin</code></a>, <a href="#NWI-nl"><code>nl</code></a>, <a href="#NWI-out"><code>out</code></a>, <a href="#NWI-uncond"><code>uncond</code></a>, <a href="#NWI-unitAction"><code>unitAction</code></a> (links are to index).<p>
+</blockquote><p>
+
+<h2><code><a name="NWDRDL5J-2">Format</a></code> implementation</h2>
+<p>
+<pre><a name="NWRDL5J-1p0Y9w-1" href="#NWDRDL5J-2"><dfn>&lt;*&gt;=</dfn></a>
+local open <a name="NWRDL5J-1p0Y9w-1-u1" href="#NWRDL5J-2T4p7r-1"><i>&lt;Modules to open&gt;</i></a> in
+  <a name="NWRDL5J-1p0Y9w-1-u2" href="#NWDRDL5J-3"><i>&lt;Type definitions&gt;</i></a>
+  <a name="NWRDL5J-1p0Y9w-1-u3" href="#NWDRDL5J-4"><i>&lt;Variable definitions&gt;</i></a>
+end
+</pre><p>
+
+<pre><a name="NWRDL5J-2T4p7r-1" href="#NWRDL5J-2T4p7r-1"><dfn>&lt;Modules to open&gt;=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b>
+BasicIO
+</pre><p>
+
+<a name="NWDRDL5J-3">Start with the abstract data type </a><code><a href="#NWDRDL5J-1">info</a></code> that holds all the
+state information.
+<p>
+<pre><a name="NWRDL5J-2eQ5X5-1" href="#NWDRDL5J-3"><dfn>&lt;Type definitions&gt;=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b>
+type <a href="#NWDRDL5J-1">info</a> =
+  int *                                 (* left <a href="#NWDRDL5J-1">margin</a>, in tabs *)
+  bool *                                (* are we <a href="#NWDRDL5J-1">at</a> left <a href="#NWDRDL5J-1">margin</a>? *)
+  int *                                 (* managed by <a href="#NWDRDL5J-1">cond</a> *)
+  int                                   (* managed by <a href="#NWDRDL5J-1">uncond</a> *)
+             
+datatype <a href="#NWDRDL5J-1">margin</a> = IN                    (* inward *)
+  | EX                                  (* outward *)
+  | AT                                  (* as is *)
+
+
+type <a href="#NWDRDL5J-1">action</a> = <a href="#NWDRDL5J-1">info</a> -&gt; <a href="#NWDRDL5J-1">info</a>
+</pre><blockquote>Defines <a href="#NWI-action"><code>action</code></a>, <a href="#NWI-info"><code>info</code></a>, <a href="#NWI-margin"><code>margin</code></a> (links are to index).<p>
+</blockquote><p>
+
+<a name="NWDRDL5J-4">The constructor returns an initialized </a><code><a href="#NWDRDL5J-1">info</a></code> suitable for the
+beginning of processing a source file.
+<p>
+<pre><a name="NWRDL5J-1mHkF-1" href="#NWDRDL5J-4"><dfn>&lt;Variable definitions&gt;=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b> <b>[D<a href="#NWRDL5J-1mHkF-2">-&gt;</a>]</b>
+fun <a href="#NWDRDL5J-1">create</a> () = (0, true, 0, 0)
+</pre><blockquote>Defines <a href="#NWI-create"><code>create</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWRDL5J-1mHkF-2" href="#NWDRDL5J-4"><dfn>&lt;Variable definitions&gt;+=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b> <b>[<a href="#NWDRDL5J-4">&lt;-</a>D<a href="#NWDRDL5J-5">-&gt;</a>]</b>
+fun <a href="#NWDRDL5J-1">unitAction</a> i = i
+</pre><blockquote>Defines <a href="#NWI-unitAction"><code>unitAction</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDRDL5J-5">Adjust </a><code>lmargin</code> only.
+<p>
+<pre><a name="NWRDL5J-1mHkF-3" href="#NWDRDL5J-4"><dfn>&lt;Variable definitions&gt;+=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b> <b>[<a href="#NWRDL5J-1mHkF-2">&lt;-</a>D<a href="#NWRDL5J-1mHkF-4">-&gt;</a>]</b>
+fun <a href="#NWDRDL5J-1">at</a> AT i = i
+  | <a href="#NWDRDL5J-1">at</a> IN (lmargin, atmargin, condflag, uncdflag) =
+    (lmargin+1, atmargin, condflag, uncdflag)
+  | <a href="#NWDRDL5J-1">at</a> EX (lmargin, atmargin, condflag, uncdflag) =
+    (lmargin-1, atmargin, condflag, uncdflag)
+</pre><blockquote>Defines <a href="#NWI-at"><code>at</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWRDL5J-1mHkF-4" href="#NWDRDL5J-4"><dfn>&lt;Variable definitions&gt;+=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b> <b>[<a href="#NWDRDL5J-5">&lt;-</a>D<a href="#NWRDL5J-1mHkF-5">-&gt;</a>]</b>
+and <a href="#NWDRDL5J-1">cond</a> IN (lmargin, atmargin, condflag, uncdflag) =
+  <a href="#NWDRDL5J-1">nl</a> IN (lmargin, atmargin, condflag + 1, uncdflag)
+  | <a href="#NWDRDL5J-1">cond</a> EX (i as (_, _, 0, _)) = i
+  | <a href="#NWDRDL5J-1">cond</a> EX (i as (lmargin, atmargin, _, uncdflag)) =
+  let
+    val (lmargin', atmargin', condflag', uncdflag') = <a href="#NWDRDL5J-1">at</a> EX i
+  in
+    (lmargin', atmargin', 0, uncdflag')
+  end
+</pre><blockquote>Defines <a href="#NWI-cond"><code>cond</code></a> (links are to index).<p>
+</blockquote><p>
+
+<pre><a name="NWRDL5J-1mHkF-5" href="#NWDRDL5J-4"><dfn>&lt;Variable definitions&gt;+=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b> <b>[<a href="#NWRDL5J-1mHkF-4">&lt;-</a>D<a href="#NWRDL5J-1mHkF-6">-&gt;</a>]</b>
+and <a href="#NWDRDL5J-1">uncond</a> AT (lmargin, atmargin, condflag, uncdflag) =
+  <a href="#NWDRDL5J-1">nl</a> AT (lmargin, atmargin, condflag, uncdflag + 1)
+  | <a href="#NWDRDL5J-1">uncond</a> EX (i as (_, _, _, 0)) = <a href="#NWDRDL5J-1">at</a> EX i
+  | <a href="#NWDRDL5J-1">uncond</a> EX i = i
+</pre><blockquote>Defines <a href="#NWI-uncond"><code>uncond</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWRDL5J-1mHkF-6" href="#NWDRDL5J-4"><dfn>&lt;Variable definitions&gt;+=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b> <b>[<a href="#NWRDL5J-1mHkF-5">&lt;-</a>D<a href="#NWRDL5J-1mHkF-7">-&gt;</a>]</b>
+and <a href="#NWDRDL5J-1">nl</a> delta (i as (lmargin, atmargin, condflag, uncdflag)) =
+  let
+    val (lmargin', _, condflag', uncdflag') = <a href="#NWDRDL5J-1">at</a> delta i
+  in
+    output(std_out, &quot;\n&quot;);
+    (lmargin', true, condflag', uncdflag')
+  end
+</pre><blockquote>Defines <a href="#NWI-nl"><code>nl</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWRDL5J-1mHkF-7" href="#NWDRDL5J-4"><dfn>&lt;Variable definitions&gt;+=</dfn></a> <b>(<a href="#NWDRDL5J-2">U-&gt;</a>)</b> <b>[<a href="#NWRDL5J-1mHkF-6">&lt;-</a>D]</b>
+and <a href="#NWDRDL5J-1">out</a> s (i as (lmargin, atmargin, _, _)) =
+  (
+   if atmargin then
+     let
+       fun rep 0 = ()
+         | rep n = (output(std_out, &quot;\t&quot;); rep (n-1))
+     in
+       rep lmargin
+     end
+   else
+     ();
+   output(std_out, s);
+   (lmargin, false, 0, 0)
+   )
+</pre><blockquote>Defines <a href="#NWI-out"><code>out</code></a> (links are to index).<p>
+</blockquote><p>
+<h2>Indices</h2>
+<h3>Chunks</h3>
+<ul>
+<li><a href="#NWDRDL5J-2"><i>&lt;*&gt;</i></a>: <a href="#NWDRDL5J-2">D1</a>
+<li><a href="#NWDRDL5J-1"><i>&lt;<code>Format.sig</code>&gt;</i></a>: <a href="#NWDRDL5J-1">D1</a>
+<li><a href="#NWRDL5J-2T4p7r-1"><i>&lt;Modules to open&gt;</i></a>: <a href="#NWDRDL5J-2">U1</a>, <a href="#NWRDL5J-2T4p7r-1">D2</a>
+<li><a href="#NWDRDL5J-3"><i>&lt;Type definitions&gt;</i></a>: <a href="#NWDRDL5J-2">U1</a>, <a href="#NWDRDL5J-3">D2</a>
+<li><a href="#NWDRDL5J-4"><i>&lt;Variable definitions&gt;</i></a>: <a href="#NWDRDL5J-2">U1</a>, <a href="#NWDRDL5J-4">D2</a>, <a href="#NWRDL5J-1mHkF-2">D3</a>, <a href="#NWDRDL5J-5">D4</a>, <a href="#NWRDL5J-1mHkF-4">D5</a>, <a href="#NWRDL5J-1mHkF-5">D6</a>, <a href="#NWRDL5J-1mHkF-6">D7</a>, <a href="#NWRDL5J-1mHkF-7">D8</a>
+</ul>
+<h3>Identifiers</h3>
+<ul>
+<li><a name="NWI-action" href="#NWDRDL5J-1">action</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWDRDL5J-3">D2</a>
+<li><a name="NWI-at" href="#NWDRDL5J-1">at</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWDRDL5J-3">U2</a>, <a href="#NWDRDL5J-5">D3</a>, <a href="#NWRDL5J-1mHkF-4">U4</a>, <a href="#NWRDL5J-1mHkF-5">U5</a>, <a href="#NWRDL5J-1mHkF-6">U6</a>
+<li><a name="NWI-cond" href="#NWDRDL5J-1">cond</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWDRDL5J-3">U2</a>, <a href="#NWRDL5J-1mHkF-4">D3</a>
+<li><a name="NWI-create" href="#NWDRDL5J-1">create</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWDRDL5J-4">D2</a>
+<li><a name="NWI-info" href="#NWDRDL5J-1">info</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWDRDL5J-3">D2</a>
+<li><a name="NWI-margin" href="#NWDRDL5J-1">margin</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWDRDL5J-3">D2</a>
+<li><a name="NWI-nl" href="#NWDRDL5J-1">nl</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWRDL5J-1mHkF-4">U2</a>, <a href="#NWRDL5J-1mHkF-5">U3</a>, <a href="#NWRDL5J-1mHkF-6">D4</a>
+<li><a name="NWI-out" href="#NWDRDL5J-1">out</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWRDL5J-1mHkF-7">D2</a>
+<li><a name="NWI-uncond" href="#NWDRDL5J-1">uncond</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWDRDL5J-3">U2</a>, <a href="#NWRDL5J-1mHkF-5">D3</a>
+<li><a name="NWI-unitAction" href="#NWDRDL5J-1">unitAction</a>: <a href="#NWDRDL5J-1">D1</a>, <a href="#NWRDL5J-1mHkF-2">D2</a>
+</ul>
+<p>
+<h2>References</h2>
+<p>
+<a name="NWcite-Schreiner and Friedman"><b>[1]</b></a> 
+Axel T. Schreiner and H. George Friedman, Jr.
+<em>
+<a name="NWDRDL5J-6">Introduction to Compiler Construction with UNIX</a> <b>[</b>UNIX is a trademark of Bell Laboratories.<b>]</b> 
+</em>.
+Prentice-Hall, Inc., New Jersey, 1985.
+<p>
+
+
+<!--%% Local Variables:-->
+<!--%% noweb-code-mode: sml-mode-->
+<!--%% End:-->
+
+
+</body></html>
+

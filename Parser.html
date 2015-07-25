@@ -1,0 +1,666 @@
+<!-- this file was generated automatically by noweave; better not edit it-->
+<html><head><title>Parser.nw</title></head><body><!-- Parser.nw-->
+<!-- For Parser.grm-->
+
+<h1>Parser for Compiler in <code>mosmlyac</code></h1>
+<address>Franklin Chen</address>
+<b><a name="NWDOjbSR-1">July 28, 1996</a></b>
+<p>
+<!--title goes here-->
+This is a parser for the project developed in <b>[cite&nbsp;<a href="#NWcite-{">{</a>]</b>Schreiner and
+Friedman, done in <code>mosmlyac</code> for Moscow ML rather than in
+<code>yacc</code> for C.
+<p>
+The specification file has a well-defined format:
+<p>
+<pre><a name="NWOjbSR-1p0Y9w-1" href="#NWDOjbSR-1"><dfn>&lt;*&gt;=</dfn></a>
+%{
+<a name="NWOjbSR-1p0Y9w-1-u1" href="#NWDOjbSR-2"><i>&lt;Header&gt;</i></a>
+%}
+<a name="NWOjbSR-1p0Y9w-1-u2" href="#NWDOjbSR-3"><i>&lt;Declarations&gt;</i></a>
+%%
+<a name="NWOjbSR-1p0Y9w-1-u3" href="#NWDOjbSR-A"><i>&lt;Rules&gt;</i></a>
+%%
+<a name="NWOjbSR-1p0Y9w-1-u4" href="#NWDOjbSR-H"><i>&lt;Trailer&gt;</i></a>
+</pre><p>
+
+<h2><a name="NWDOjbSR-2">Header</a></h2>
+<p>
+We prefer not to <code>open</code> modules unnecessarily.
+<p>
+<pre><a name="NWOjbSR-2Cop3h-1" href="#NWDOjbSR-2"><dfn>&lt;Header&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-1">&lt;-U</a>)</b>
+(* Empty *)
+</pre><p>
+
+<h2><a name="NWDOjbSR-3">Declarations</a></h2>
+<p>
+<pre><a name="NWOjbSR-ctnVG-1" href="#NWDOjbSR-3"><dfn>&lt;Declarations&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-1">&lt;-U</a>)</b>
+<a name="NWOjbSR-ctnVG-1-u1" href="#NWDOjbSR-4"><i>&lt;Tokens&gt;</i></a>
+<a name="NWOjbSR-ctnVG-1-u2" href="#NWDOjbSR-7"><i>&lt;Precedence&gt;</i></a>
+<a name="NWOjbSR-ctnVG-1-u3" href="#NWDOjbSR-8"><i>&lt;Entry points&gt;</i></a>
+<a name="NWOjbSR-ctnVG-1-u4" href="#NWDOjbSR-9"><i>&lt;Other nonterminal types&gt;</i></a>
+</pre><p>
+
+<h3><a name="NWDOjbSR-4">Tokens</a></h3>
+<p>
+These are the only tokens with attributes.
+<p>
+<pre><a name="NWOjbSR-3HycQZ-1" href="#NWDOjbSR-4"><dfn>&lt;Tokens&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-3">&lt;-U</a>)</b> <b>[D<a href="#NWDOjbSR-5">-&gt;</a>]</b>
+%token &lt;string&gt; <a href="#NWDOjbSR-4">Identifier</a>
+%token &lt;int&gt; <a href="#NWDOjbSR-4">Constant</a>
+</pre><blockquote>Defines <a href="#NWI-Constant"><code>Constant</code></a>, <a href="#NWI-Identifier"><code>Identifier</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDOjbSR-5">The rest of the tokens do not need attributes.</a>
+<p>
+<pre><a name="NWOjbSR-3HycQZ-2" href="#NWDOjbSR-4"><dfn>&lt;Tokens&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-3">&lt;-U</a>)</b> <b>[<a href="#NWDOjbSR-4">&lt;-</a>D<a href="#NWDOjbSR-6">-&gt;</a>]</b>
+%token <a href="#NWDOjbSR-5">INT</a>
+%token <a href="#NWDOjbSR-5">IF</a>
+%token <a href="#NWDOjbSR-5">ELSE</a>
+%token <a href="#NWDOjbSR-5">WHILE</a>
+%token <a href="#NWDOjbSR-5">BREAK</a>
+%token <a href="#NWDOjbSR-5">CONTINUE</a>
+%token <a href="#NWDOjbSR-5">RETURN</a>
+%token <a href="#NWDOjbSR-5">SEMI</a>
+%token <a href="#NWDOjbSR-5">LPAREN</a>
+%token <a href="#NWDOjbSR-5">RPAREN</a>
+%token <a href="#NWDOjbSR-5">LBRACE</a>
+%token <a href="#NWDOjbSR-5">RBRACE</a>
+%token <a href="#NWDOjbSR-5">PLUS</a>
+%token <a href="#NWDOjbSR-5">MINUS</a>
+%token <a href="#NWDOjbSR-5">TIMES</a>
+%token <a href="#NWDOjbSR-5">DIVIDE</a>
+%token <a href="#NWDOjbSR-5">REM</a>
+%token <a href="#NWDOjbSR-5">GT</a>
+%token <a href="#NWDOjbSR-5">LT</a>
+%token <a href="#NWDOjbSR-5">GE</a>
+%token <a href="#NWDOjbSR-5">LE</a>
+%token <a href="#NWDOjbSR-5">EQ</a>
+%token <a href="#NWDOjbSR-5">NE</a>
+%token <a href="#NWDOjbSR-5">AMP</a>
+%token <a href="#NWDOjbSR-5">CARET</a>
+%token <a href="#NWDOjbSR-5">BAR</a>
+%token <a href="#NWDOjbSR-5">ASSIGN</a>
+%token <a href="#NWDOjbSR-5">PE</a>
+%token <a href="#NWDOjbSR-5">ME</a>
+%token <a href="#NWDOjbSR-5">TE</a>
+%token <a href="#NWDOjbSR-5">DE</a>
+%token <a href="#NWDOjbSR-5">RE</a>
+%token <a href="#NWDOjbSR-5">PP</a>
+%token <a href="#NWDOjbSR-5">MM</a>
+%token <a href="#NWDOjbSR-5">COMMA</a>
+</pre><blockquote>Defines <a href="#NWI-AMP"><code>AMP</code></a>, <a href="#NWI-ASSIGN"><code>ASSIGN</code></a>, <a href="#NWI-BAR"><code>BAR</code></a>, <a href="#NWI-BREAK"><code>BREAK</code></a>, <a href="#NWI-CARET"><code>CARET</code></a>, <a href="#NWI-COMMA"><code>COMMA</code></a>, <a href="#NWI-CONTINUE"><code>CONTINUE</code></a>, <a href="#NWI-DE"><code>DE</code></a>, <a href="#NWI-DIVIDE"><code>DIVIDE</code></a>, <a href="#NWI-ELSE"><code>ELSE</code></a>, <a href="#NWI-EQ"><code>EQ</code></a>, <a href="#NWI-GE"><code>GE</code></a>, <a href="#NWI-GT"><code>GT</code></a>, <a href="#NWI-IF"><code>IF</code></a>, <a href="#NWI-INT"><code>INT</code></a>, <a href="#NWI-LBRACE"><code>LBRACE</code></a>, <a href="#NWI-LE"><code>LE</code></a>, <a href="#NWI-LPAREN"><code>LPAREN</code></a>, <a href="#NWI-LT"><code>LT</code></a>, <a href="#NWI-ME"><code>ME</code></a>, <a href="#NWI-MINUS"><code>MINUS</code></a>, <a href="#NWI-MM"><code>MM</code></a>, <a href="#NWI-NE"><code>NE</code></a>, <a href="#NWI-PE"><code>PE</code></a>, <a href="#NWI-PLUS"><code>PLUS</code></a>, <a href="#NWI-PP"><code>PP</code></a>, <a href="#NWI-RBRACE"><code>RBRACE</code></a>, <a href="#NWI-RE"><code>RE</code></a>, <a href="#NWI-REM"><code>REM</code></a>, <a href="#NWI-RETURN"><code>RETURN</code></a>, <a href="#NWI-RPAREN"><code>RPAREN</code></a>, <a href="#NWI-SEMI"><code>SEMI</code></a>, <a href="#NWI-TE"><code>TE</code></a>, <a href="#NWI-TIMES"><code>TIMES</code></a>, <a href="#NWI-WHILE"><code>WHILE</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDOjbSR-6">The usual end-of-file token.</a>
+<p>
+<pre><a name="NWOjbSR-3HycQZ-3" href="#NWDOjbSR-4"><dfn>&lt;Tokens&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-3">&lt;-U</a>)</b> <b>[<a href="#NWDOjbSR-5">&lt;-</a>D]</b>
+%token <a href="#NWDOjbSR-6">EOF</a>
+</pre><blockquote>Defines <a href="#NWI-EOF"><code>EOF</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDOjbSR-7">Precedences follow, from lowest to highest.</a>
+<p>
+<pre><a name="NWOjbSR-38Q7FM-1" href="#NWDOjbSR-7"><dfn>&lt;Precedence&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-3">&lt;-U</a>)</b>
+%right <a href="#NWDOjbSR-5">ASSIGN</a> <a href="#NWDOjbSR-5">PE</a> <a href="#NWDOjbSR-5">ME</a> <a href="#NWDOjbSR-5">TE</a> <a href="#NWDOjbSR-5">DE</a> <a href="#NWDOjbSR-5">RE</a>
+%left <a href="#NWDOjbSR-5">BAR</a>
+%left <a href="#NWDOjbSR-5">CARET</a>
+%left <a href="#NWDOjbSR-5">AMP</a>
+%left <a href="#NWDOjbSR-5">EQ</a> <a href="#NWDOjbSR-5">NE</a>
+%left <a href="#NWDOjbSR-5">LT</a> <a href="#NWDOjbSR-5">GT</a> <a href="#NWDOjbSR-5">GE</a> <a href="#NWDOjbSR-5">LE</a>
+%left <a href="#NWDOjbSR-5">PLUS</a> <a href="#NWDOjbSR-5">MINUS</a>
+%left <a href="#NWDOjbSR-5">TIMES</a> <a href="#NWDOjbSR-5">DIVIDE</a> <a href="#NWDOjbSR-5">REM</a>
+%right <a href="#NWDOjbSR-5">PP</a> <a href="#NWDOjbSR-5">MM</a>
+</pre><blockquote>Defines <a href="#NWI-AMP"><code>AMP</code></a>, <a href="#NWI-ASSIGN"><code>ASSIGN</code></a>, <a href="#NWI-BAR"><code>BAR</code></a>, <a href="#NWI-CARET"><code>CARET</code></a>, <a href="#NWI-DE"><code>DE</code></a>, <a href="#NWI-DIVIDE"><code>DIVIDE</code></a>, <a href="#NWI-EQ"><code>EQ</code></a>, <a href="#NWI-GE"><code>GE</code></a>, <a href="#NWI-GT"><code>GT</code></a>, <a href="#NWI-LE"><code>LE</code></a>, <a href="#NWI-LT"><code>LT</code></a>, <a href="#NWI-ME"><code>ME</code></a>, <a href="#NWI-MINUS"><code>MINUS</code></a>, <a href="#NWI-MM"><code>MM</code></a>, <a href="#NWI-NE"><code>NE</code></a>, <a href="#NWI-PE"><code>PE</code></a>, <a href="#NWI-PLUS"><code>PLUS</code></a>, <a href="#NWI-PP"><code>PP</code></a>, <a href="#NWI-RE"><code>RE</code></a>, <a href="#NWI-REM"><code>REM</code></a>, <a href="#NWI-TE"><code>TE</code></a>, <a href="#NWI-TIMES"><code>TIMES</code></a> (links are to index).<p>
+</blockquote><p>
+<h3><a name="NWDOjbSR-8">Nonterminals</a></h3>
+<p>
+We only have one entry point.
+<p>
+<pre><a name="NWOjbSR-2YG0OD-1" href="#NWDOjbSR-8"><dfn>&lt;Entry points&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-3">&lt;-U</a>)</b>
+%start <a href="#NWOjbSR-3YdKJI-1">program</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-3YdKJI-1">program</a>
+</pre><p>
+
+<a name="NWDOjbSR-9">Note the pervasive passing around of </a><code>Format.action</code>.
+<p>
+<pre><a name="NWOjbSR-3hMASJ-1" href="#NWDOjbSR-9"><dfn>&lt;Other nonterminal types&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-3">&lt;-U</a>)</b>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-C">definitions</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-D">definition</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-E">function_definition</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-1k0Vpz-1">optional_parameter_list</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-154SJU-1">parameter_list</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-3T7xCm-1">parameter_declarations</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-4G7Bec-1">parameter_declaration</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-WGLLv-1">parameter_declarator_list</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2G2zjw-1">compound_statement</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-1CkrkX-1">declarations</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-1Z3IqZ-1">declaration</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-3LmLat-1">declarator_list</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2CNcP3-1">statements</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-309U3L-1">statement</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-zn0xc-1">if_prefix</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-3Pa0E6-1">loop_prefix</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-44GxM1-1">expression</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2SFrQP-1">binary</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-4ff7m-1">optional_argument_list</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-PEFGu-1">argument_list</a>
+<a name="NWOjbSR-3hMASJ-1-u1" href="#NWOjbSR-1frP2J-1"><i>&lt;Dummy nonterminal types&gt;</i></a>
+</pre><p>
+
+<h2><a name="NWDOjbSR-A">Rules</a></h2>
+<p>
+Note that various synthesized attributes are now functions, in order
+to simulate the inherited formatter attribute we pass around to do
+pretty-printing.
+<p>
+<pre><a name="NWOjbSR-4NYzdP-1" href="#NWDOjbSR-A"><dfn>&lt;Rules&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-1">&lt;-U</a>)</b>
+<a name="NWOjbSR-4NYzdP-1-u1" href="#NWOjbSR-3YdKJI-1"><i>&lt;Main entry point&gt;</i></a>
+<a name="NWOjbSR-4NYzdP-1-u2" href="#NWDOjbSR-B"><i>&lt;Other rules&gt;</i></a>
+</pre><p>
+
+<pre><a name="NWOjbSR-3YdKJI-1" href="#NWOjbSR-3YdKJI-1"><dfn>&lt;Main entry point&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-A">&lt;-U</a>)</b>
+<a href="#NWOjbSR-3YdKJI-1">program</a>
+        : <a href="#NWDOjbSR-C">definitions</a> <a href="#NWDOjbSR-6">EOF</a> { $1 }
+</pre><blockquote>Defines <a href="#NWI-program"><code>program</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDOjbSR-B">We will expand each of these later.</a>
+<p>
+<pre><a name="NWOjbSR-1h0SD2-1" href="#NWDOjbSR-B"><dfn>&lt;Other rules&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-A">&lt;-U</a>)</b>
+<a name="NWOjbSR-1h0SD2-1-u1" href="#NWDOjbSR-C"><i>&lt;<code>definitions</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u2" href="#NWDOjbSR-D"><i>&lt;<code>definition</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u3" href="#NWDOjbSR-E"><i>&lt;<code>function_definition</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u4" href="#NWOjbSR-1k0Vpz-1"><i>&lt;<code>optional_parameter_list</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u5" href="#NWOjbSR-154SJU-1"><i>&lt;<code>parameter_list</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u6" href="#NWOjbSR-3T7xCm-1"><i>&lt;<code>parameter_declarations</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u7" href="#NWOjbSR-4G7Bec-1"><i>&lt;<code>parameter_declaration</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u8" href="#NWOjbSR-WGLLv-1"><i>&lt;<code>parameter_declarator_list</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u9" href="#NWOjbSR-2G2zjw-1"><i>&lt;<code>compound_statement</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u10" href="#NWOjbSR-1CkrkX-1"><i>&lt;<code>declarations</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u11" href="#NWOjbSR-1Z3IqZ-1"><i>&lt;<code>declaration</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u12" href="#NWOjbSR-3LmLat-1"><i>&lt;<code>declarator_list</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u13" href="#NWOjbSR-2CNcP3-1"><i>&lt;<code>statements</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u14" href="#NWOjbSR-309U3L-1"><i>&lt;<code>statement</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u15" href="#NWOjbSR-zn0xc-1"><i>&lt;<code>if_prefix</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u16" href="#NWOjbSR-3Pa0E6-1"><i>&lt;<code>loop_prefix</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u17" href="#NWOjbSR-44GxM1-1"><i>&lt;<code>expression</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u18" href="#NWOjbSR-2SFrQP-1"><i>&lt;<code>binary</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u19" href="#NWOjbSR-4ff7m-1"><i>&lt;<code>optional_argument_list</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u20" href="#NWOjbSR-PEFGu-1"><i>&lt;<code>argument_list</code>&gt;</i></a>
+<a name="NWOjbSR-1h0SD2-1-u21" href="#NWDOjbSR-F"><i>&lt;Rules for dummy nonterminals&gt;</i></a>
+</pre><p>
+
+<a name="NWDOjbSR-C">Use function composition to build up a composite action that will be</a>
+executed.
+<p>
+<pre><a name="NWOjbSR-47W96y-1" href="#NWDOjbSR-C"><dfn>&lt;<code>definitions</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWDOjbSR-C">definitions</a>
+        : <a href="#NWDOjbSR-D">definition</a> { $1 }
+        | <a href="#NWDOjbSR-C">definitions</a> <a href="#NWDOjbSR-D">definition</a> { $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-definitions"><code>definitions</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDOjbSR-D">We replace the former </a><code><a href="#NWDOjbSR-5">INT</a></code> with a simple nonterminal <code><a href="#NWDOjbSR-F">n_int</a></code> in
+order to associate actions with tokens.
+<p>
+<pre><a name="NWOjbSR-1zuCAO-1" href="#NWDOjbSR-D"><dfn>&lt;<code>definition</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWDOjbSR-D">definition</a>
+        : <a href="#NWDOjbSR-E">function_definition</a> { $1 }
+        | <a href="#NWDOjbSR-F">n_int</a> <a href="#NWDOjbSR-E">function_definition</a> { $2 o $1 }
+        | <a href="#NWOjbSR-1Z3IqZ-1">declaration</a> { $1 }
+</pre><blockquote>Defines <a href="#NWI-definition"><code>definition</code></a> (links are to index).<p>
+</blockquote><p>
+<a name="NWDOjbSR-E">Note that </a><code><a href="#NWDOjbSR-E">function_definition_1</a></code> and <code><a href="#NWDOjbSR-E">function_definition_2</a></code> had
+to be introduced because unlike <tt>yacc</tt>, <tt>mosmlyac</tt> does not
+support actions within rules.
+<p>
+<pre><a name="NWOjbSR-3McS7s-1" href="#NWDOjbSR-E"><dfn>&lt;<code>function_definition</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWDOjbSR-E">function_definition</a>
+        : <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-2">n_lp</a> <a href="#NWOjbSR-1k0Vpz-1">optional_parameter_list</a> <a href="#NWOjbSR-2rkOR9-2">n_rp</a>
+          <a href="#NWDOjbSR-E">function_definition_1</a>
+          <a href="#NWOjbSR-3T7xCm-1">parameter_declarations</a>
+          <a href="#NWDOjbSR-E">function_definition_2</a>
+          <a href="#NWOjbSR-2G2zjw-1">compound_statement</a> { (Format.nl Format.AT) o
+                              $8 o $7 o $6 o $5 o $4 o $3 o $2 o $1 }
+
+<a href="#NWDOjbSR-E">function_definition_1</a>: { Format.nl Format.IN }
+
+<a href="#NWDOjbSR-E">function_definition_2</a>: { Format.at Format.EX }
+</pre><blockquote>Defines <a href="#NWI-function_definition"><code>function_definition</code></a>, <a href="#NWI-function_definition_1"><code>function_definition_1</code></a>, <a href="#NWI-function_definition_2"><code>function_definition_2</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-1frP2J-1" href="#NWOjbSR-1frP2J-1"><dfn>&lt;Dummy nonterminal types&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-9">&lt;-U</a>)</b> <b>[D<a href="#NWOjbSR-1frP2J-2">-&gt;</a>]</b>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-E">function_definition_1</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-E">function_definition_2</a>
+</pre><p>
+
+<pre><a name="NWOjbSR-1k0Vpz-1" href="#NWOjbSR-1k0Vpz-1"><dfn>&lt;<code>optional_parameter_list</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-1k0Vpz-1">optional_parameter_list</a>
+        : /* no formal parameters */ { Format.unitAction }
+        | <a href="#NWOjbSR-154SJU-1">parameter_list</a> { $1 }
+</pre><blockquote>Defines <a href="#NWI-optional_parameter_list"><code>optional_parameter_list</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-154SJU-1" href="#NWOjbSR-154SJU-1"><dfn>&lt;<code>parameter_list</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-154SJU-1">parameter_list</a>
+        : <a href="#NWDOjbSR-F">n_identifier</a> { $1 }
+        | <a href="#NWOjbSR-154SJU-1">parameter_list</a> <a href="#NWOjbSR-2rkOR9-2">n_co</a> <a href="#NWDOjbSR-F">n_identifier</a> { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-parameter_list"><code>parameter_list</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-3T7xCm-1" href="#NWOjbSR-3T7xCm-1"><dfn>&lt;<code>parameter_declarations</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-3T7xCm-1">parameter_declarations</a>
+        : /* null */ { Format.unitAction }
+        | <a href="#NWOjbSR-3T7xCm-1">parameter_declarations</a> <a href="#NWOjbSR-4G7Bec-1">parameter_declaration</a> { $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-parameter_declarations"><code>parameter_declarations</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-4G7Bec-1" href="#NWOjbSR-4G7Bec-1"><dfn>&lt;<code>parameter_declaration</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-4G7Bec-1">parameter_declaration</a>
+        : <a href="#NWDOjbSR-F">n_int</a> <a href="#NWOjbSR-WGLLv-1">parameter_declarator_list</a> n_sc { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-parameter_declaration"><code>parameter_declaration</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-WGLLv-1" href="#NWOjbSR-WGLLv-1"><dfn>&lt;<code>parameter_declarator_list</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-WGLLv-1">parameter_declarator_list</a>
+        : <a href="#NWDOjbSR-F">n_identifier</a> { $1 }
+        | <a href="#NWOjbSR-WGLLv-1">parameter_declarator_list</a> <a href="#NWOjbSR-2rkOR9-2">n_co</a> <a href="#NWDOjbSR-F">n_identifier</a> { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-parameter_declarator_list"><code>parameter_declarator_list</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2G2zjw-1" href="#NWOjbSR-2G2zjw-1"><dfn>&lt;<code>compound_statement</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-2G2zjw-1">compound_statement</a>
+        : <a href="#NWDOjbSR-G">n_lr</a> <a href="#NWOjbSR-1CkrkX-1">declarations</a>
+          <a href="#NWOjbSR-2G2zjw-1">compound_statement_1</a>
+          <a href="#NWOjbSR-2CNcP3-1">statements</a> <a href="#NWDOjbSR-G">n_rr</a> { $5 o $4 o $3 o $2 o $1 }
+
+<a href="#NWOjbSR-2G2zjw-1">compound_statement_1</a>: { Format.nl Format.AT }
+</pre><blockquote>Defines <a href="#NWI-compound_statement"><code>compound_statement</code></a>, <a href="#NWI-compound_statement_1"><code>compound_statement_1</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-1frP2J-2" href="#NWOjbSR-1frP2J-1"><dfn>&lt;Dummy nonterminal types&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-9">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-1frP2J-1">&lt;-</a>D<a href="#NWOjbSR-1frP2J-3">-&gt;</a>]</b>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2G2zjw-1">compound_statement_1</a>
+</pre><p>
+
+<pre><a name="NWOjbSR-1CkrkX-1" href="#NWOjbSR-1CkrkX-1"><dfn>&lt;<code>declarations</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-1CkrkX-1">declarations</a>
+        : /* null */ { Format.unitAction }
+        | <a href="#NWOjbSR-1CkrkX-1">declarations</a> <a href="#NWOjbSR-1Z3IqZ-1">declaration</a> { $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-declarations"><code>declarations</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-1Z3IqZ-1" href="#NWOjbSR-1Z3IqZ-1"><dfn>&lt;<code>declaration</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-1Z3IqZ-1">declaration</a>
+        : <a href="#NWDOjbSR-F">n_int</a> <a href="#NWOjbSR-3LmLat-1">declarator_list</a> n_sc { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-declaration"><code>declaration</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-3LmLat-1" href="#NWOjbSR-3LmLat-1"><dfn>&lt;<code>declarator_list</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-3LmLat-1">declarator_list</a>
+        : <a href="#NWDOjbSR-F">n_identifier</a> { $1 }
+        | <a href="#NWOjbSR-3LmLat-1">declarator_list</a> <a href="#NWOjbSR-2rkOR9-2">n_co</a> <a href="#NWDOjbSR-F">n_identifier</a> { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-declarator_list"><code>declarator_list</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2CNcP3-1" href="#NWOjbSR-2CNcP3-1"><dfn>&lt;<code>statements</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-2CNcP3-1">statements</a>
+        : /* null */ { Format.unitAction }
+        | <a href="#NWOjbSR-2CNcP3-1">statements</a> <a href="#NWOjbSR-309U3L-1">statement</a> { $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-statements"><code>statements</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-309U3L-1" href="#NWOjbSR-309U3L-1"><dfn>&lt;<code>statement</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-309U3L-1">statement</a>
+        : <a href="#NWOjbSR-44GxM1-1">expression</a> n_sc { $2 o $1 }
+        | n_sc  /* null <a href="#NWOjbSR-309U3L-1">statement</a> */ { $1 }
+        | <a href="#NWDOjbSR-G">n_break</a> n_sc { $2 o $1 }
+        | <a href="#NWDOjbSR-G">n_continue</a> n_sc { $2 o $1 }
+        | <a href="#NWDOjbSR-G">n_return</a> n_sc { $2 o $1 }
+        | <a href="#NWDOjbSR-G">n_return</a>
+          <a href="#NWOjbSR-309U3L-1">statement_1</a>
+          <a href="#NWOjbSR-44GxM1-1">expression</a> n_sc { $4 o $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2G2zjw-1">compound_statement</a> { $1 }
+        | <a href="#NWOjbSR-zn0xc-1">if_prefix</a> <a href="#NWOjbSR-309U3L-1">statement</a> { (Format.uncond Format.EX) o $2 o $1 }
+        | <a href="#NWOjbSR-zn0xc-1">if_prefix</a> <a href="#NWOjbSR-309U3L-1">statement</a> <a href="#NWOjbSR-2rkOR9-5">n_else</a> <a href="#NWOjbSR-309U3L-1">statement</a> { (Format.uncond Format.EX) o
+                                                $4 o $3 o $2 o $1}
+        | <a href="#NWOjbSR-3Pa0E6-1">loop_prefix</a> <a href="#NWOjbSR-309U3L-1">statement</a> { (Format.uncond Format.EX) o $2 o $1 }
+
+<a href="#NWOjbSR-309U3L-1">statement_1</a>: { Format.out &quot; &quot; }
+</pre><blockquote>Defines <a href="#NWI-statement"><code>statement</code></a>, <a href="#NWI-statement_1"><code>statement_1</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-1frP2J-3" href="#NWOjbSR-1frP2J-1"><dfn>&lt;Dummy nonterminal types&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-9">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-1frP2J-2">&lt;-</a>D<a href="#NWOjbSR-1frP2J-4">-&gt;</a>]</b>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-309U3L-1">statement_1</a>
+</pre><p>
+
+<pre><a name="NWOjbSR-zn0xc-1" href="#NWOjbSR-zn0xc-1"><dfn>&lt;<code>if_prefix</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-zn0xc-1">if_prefix</a>
+        : <a href="#NWOjbSR-2rkOR9-5">n_if</a> <a href="#NWOjbSR-2rkOR9-2">n_lp</a> <a href="#NWOjbSR-44GxM1-1">expression</a> <a href="#NWOjbSR-2rkOR9-2">n_rp</a> { (Format.cond Format.IN) o
+                                     $4 o $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-if_prefix"><code>if_prefix</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-3Pa0E6-1" href="#NWOjbSR-3Pa0E6-1"><dfn>&lt;<code>loop_prefix</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-3Pa0E6-1">loop_prefix</a>
+        : <a href="#NWOjbSR-2rkOR9-5">n_while</a> <a href="#NWOjbSR-2rkOR9-2">n_lp</a> <a href="#NWOjbSR-44GxM1-1">expression</a> <a href="#NWOjbSR-2rkOR9-2">n_rp</a> { (Format.cond Format.IN) o
+                                        $4 o $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-loop_prefix"><code>loop_prefix</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-44GxM1-1" href="#NWOjbSR-44GxM1-1"><dfn>&lt;<code>expression</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-44GxM1-1">expression</a>
+        : <a href="#NWOjbSR-2SFrQP-1">binary</a> { $1 }
+        | <a href="#NWOjbSR-44GxM1-1">expression</a> <a href="#NWOjbSR-2rkOR9-2">n_co</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-expression"><code>expression</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2SFrQP-1" href="#NWOjbSR-2SFrQP-1"><dfn>&lt;<code>binary</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-2SFrQP-1">binary</a>
+        : <a href="#NWDOjbSR-F">n_identifier</a> { $1 }
+        | <a href="#NWOjbSR-2rkOR9-5">n_constant</a> { $1 }
+        | <a href="#NWOjbSR-2rkOR9-2">n_lp</a> <a href="#NWOjbSR-44GxM1-1">expression</a> <a href="#NWOjbSR-2rkOR9-2">n_rp</a> { $3 o $2 o $1 }
+        | <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-2">n_lp</a> <a href="#NWOjbSR-4ff7m-1">optional_argument_list</a> <a href="#NWOjbSR-2rkOR9-2">n_rp</a> { $4 o $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2rkOR9-6">n_pp</a> <a href="#NWDOjbSR-F">n_identifier</a> %prec <a href="#NWDOjbSR-5">PP</a> { $2 o $1 }
+        | <a href="#NWOjbSR-2rkOR9-6">n_mm</a> <a href="#NWDOjbSR-F">n_identifier</a> %prec <a href="#NWDOjbSR-5">PP</a> { $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-6">n_pl</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">PLUS</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-6">n_mi</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">PLUS</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-6">n_mu</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">TIMES</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-6">n_di</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">TIMES</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-6">n_rm</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">TIMES</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-7">n_gt</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">GT</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-7">n_lt</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">GT</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-7">n_ge</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">GT</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-7">n_le</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">GT</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-7">n_eq</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">EQ</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-7">n_ne</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">EQ</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-8">n_an</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">AMP</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-8">n_xo</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">CARET</a> { $3 o $2 o $1 }
+        | <a href="#NWOjbSR-2SFrQP-1">binary</a> <a href="#NWOjbSR-2rkOR9-8">n_or</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">BAR</a> { $3 o $2 o $1 }
+        | <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-9">n_as</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">ASSIGN</a> { $3 o $2 o $1 }
+        | <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-9">n_pe</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">ASSIGN</a> { $3 o $2 o $1 }
+        | <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-9">n_me</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">ASSIGN</a> { $3 o $2 o $1 }
+        | <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-9">n_te</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">ASSIGN</a> { $3 o $2 o $1 }
+        | <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-9">n_de</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">ASSIGN</a> { $3 o $2 o $1 }
+        | <a href="#NWDOjbSR-F">n_identifier</a> <a href="#NWOjbSR-2rkOR9-9">n_re</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> %prec <a href="#NWDOjbSR-5">ASSIGN</a> { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-binary"><code>binary</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-4ff7m-1" href="#NWOjbSR-4ff7m-1"><dfn>&lt;<code>optional_argument_list</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-4ff7m-1">optional_argument_list</a>
+        : /* no actual arguments */ { Format.unitAction }
+        | <a href="#NWOjbSR-PEFGu-1">argument_list</a> { $1 }
+</pre><blockquote>Defines <a href="#NWI-optional_argument_list"><code>optional_argument_list</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-PEFGu-1" href="#NWOjbSR-PEFGu-1"><dfn>&lt;<code>argument_list</code>&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b>
+<a href="#NWOjbSR-PEFGu-1">argument_list</a>
+        : <a href="#NWOjbSR-2SFrQP-1">binary</a> { $1 }
+        | <a href="#NWOjbSR-PEFGu-1">argument_list</a> <a href="#NWOjbSR-2rkOR9-2">n_co</a> <a href="#NWOjbSR-2SFrQP-1">binary</a> { $3 o $2 o $1 }
+</pre><blockquote>Defines <a href="#NWI-argument_list"><code>argument_list</code></a> (links are to index).<p>
+</blockquote><p>
+<h3><a name="NWDOjbSR-F">Dummy nonterminals</a></h3>
+<p>
+These nonterminals are used to cause actions to be performed for
+tokens.
+<p>
+<pre><a name="NWOjbSR-2rkOR9-1" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[D<a href="#NWOjbSR-2rkOR9-2">-&gt;</a>]</b>
+<a href="#NWDOjbSR-F">n_int</a>: <a href="#NWDOjbSR-5">INT</a> { Format.out &quot;int\t&quot; }
+<a href="#NWDOjbSR-F">n_identifier</a>: <a href="#NWDOjbSR-4">Identifier</a> { Format.out $1 }
+</pre><blockquote>Defines <a href="#NWI-n_identifier"><code>n_identifier</code></a>, <a href="#NWI-n_int"><code>n_int</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2rkOR9-2" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWDOjbSR-F">&lt;-</a>D<a href="#NWOjbSR-2rkOR9-3">-&gt;</a>]</b>
+<a href="#NWOjbSR-2rkOR9-2">n_lp</a>: <a href="#NWDOjbSR-5">LPAREN</a> { Format.out &quot;(&quot; }
+<a href="#NWOjbSR-2rkOR9-2">n_rp</a>: <a href="#NWDOjbSR-5">RPAREN</a> { Format.out &quot;)&quot; }
+<a href="#NWOjbSR-2rkOR9-2">n_co</a>: <a href="#NWDOjbSR-5">COMMA</a> { Format.out &quot;, &quot; }
+</pre><blockquote>Defines <a href="#NWI-n_co"><code>n_co</code></a>, <a href="#NWI-n_lp"><code>n_lp</code></a>, <a href="#NWI-n_rp"><code>n_rp</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2rkOR9-3" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-2rkOR9-2">&lt;-</a>D<a href="#NWDOjbSR-G">-&gt;</a>]</b>
+n_sc: <a href="#NWDOjbSR-5">SEMI</a> { (Format.nl Format.AT) o (Format.out &quot;;&quot;) }
+</pre><p>
+<!--% FMC could not use because line too long-->
+<!--%@ %def n_sc-->
+
+<a name="NWDOjbSR-G">*</a>
+<pre><a name="NWOjbSR-2rkOR9-4" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-2rkOR9-3">&lt;-</a>D<a href="#NWOjbSR-2rkOR9-5">-&gt;</a>]</b>
+<a href="#NWDOjbSR-G">n_break</a>: <a href="#NWDOjbSR-5">BREAK</a> { Format.out &quot;break&quot; }
+<a href="#NWDOjbSR-G">n_continue</a>: <a href="#NWDOjbSR-5">CONTINUE</a> { Format.out &quot;continue&quot; }
+<a href="#NWDOjbSR-G">n_return</a>: <a href="#NWDOjbSR-5">RETURN</a> { Format.out &quot;return&quot; }
+<a href="#NWDOjbSR-G">n_lr</a>: <a href="#NWDOjbSR-5">LBRACE</a> { (Format.at Format.IN) o
+  (Format.out &quot;{\t&quot;) o (Format.cond Format.EX) }
+<a href="#NWDOjbSR-G">n_rr</a>: <a href="#NWDOjbSR-5">RBRACE</a> { (Format.uncond Format.AT) o
+  (Format.out &quot;}&quot;) o (Format.at Format.EX) }
+</pre><blockquote>Defines <a href="#NWI-n_break"><code>n_break</code></a>, <a href="#NWI-n_continue"><code>n_continue</code></a>, <a href="#NWI-n_lr"><code>n_lr</code></a>, <a href="#NWI-n_return"><code>n_return</code></a>, <a href="#NWI-n_rr"><code>n_rr</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2rkOR9-5" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWDOjbSR-G">&lt;-</a>D<a href="#NWOjbSR-2rkOR9-6">-&gt;</a>]</b>
+<a href="#NWOjbSR-2rkOR9-5">n_if</a>: <a href="#NWDOjbSR-5">IF</a> { Format.out &quot;if &quot; }
+<a href="#NWOjbSR-2rkOR9-5">n_else</a>: <a href="#NWDOjbSR-5">ELSE</a> { (Format.cond Format.IN) o
+  (Format.out &quot;else&quot;) o (Format.at Format.EX) }
+<a href="#NWOjbSR-2rkOR9-5">n_while</a>: <a href="#NWDOjbSR-5">WHILE</a> { Format.out &quot;while &quot; }
+<a href="#NWOjbSR-2rkOR9-5">n_constant</a>: <a href="#NWDOjbSR-4">Constant</a> { Format.out (Int.toString $1) }
+</pre><blockquote>Defines <a href="#NWI-n_constant"><code>n_constant</code></a>, <a href="#NWI-n_else"><code>n_else</code></a>, <a href="#NWI-n_if"><code>n_if</code></a>, <a href="#NWI-n_while"><code>n_while</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2rkOR9-6" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-2rkOR9-5">&lt;-</a>D<a href="#NWOjbSR-2rkOR9-7">-&gt;</a>]</b>
+<a href="#NWOjbSR-2rkOR9-6">n_pp</a>: <a href="#NWDOjbSR-5">PP</a> { Format.out &quot; ++ &quot; }
+<a href="#NWOjbSR-2rkOR9-6">n_mm</a>: <a href="#NWDOjbSR-5">MM</a> { Format.out &quot; -- &quot; }
+<a href="#NWOjbSR-2rkOR9-6">n_pl</a>: <a href="#NWDOjbSR-5">PLUS</a> { Format.out &quot; + &quot; }
+<a href="#NWOjbSR-2rkOR9-6">n_mi</a>: <a href="#NWDOjbSR-5">MINUS</a> { Format.out &quot; - &quot; }
+<a href="#NWOjbSR-2rkOR9-6">n_mu</a>: <a href="#NWDOjbSR-5">TIMES</a> { Format.out &quot; * &quot; }
+<a href="#NWOjbSR-2rkOR9-6">n_di</a>: <a href="#NWDOjbSR-5">DIVIDE</a> { Format.out &quot; / &quot; }
+<a href="#NWOjbSR-2rkOR9-6">n_rm</a>: <a href="#NWDOjbSR-5">REM</a> { Format.out &quot; % &quot; }
+</pre><blockquote>Defines <a href="#NWI-n_di"><code>n_di</code></a>, <a href="#NWI-n_mi"><code>n_mi</code></a>, <a href="#NWI-n_mm"><code>n_mm</code></a>, <a href="#NWI-n_mu"><code>n_mu</code></a>, <a href="#NWI-n_pl"><code>n_pl</code></a>, <a href="#NWI-n_pp"><code>n_pp</code></a>, <a href="#NWI-n_rm"><code>n_rm</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2rkOR9-7" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-2rkOR9-6">&lt;-</a>D<a href="#NWOjbSR-2rkOR9-8">-&gt;</a>]</b>
+<a href="#NWOjbSR-2rkOR9-7">n_gt</a>: <a href="#NWDOjbSR-5">GT</a> { Format.out &quot; &gt; &quot; }
+<a href="#NWOjbSR-2rkOR9-7">n_lt</a>: <a href="#NWDOjbSR-5">LT</a> { Format.out &quot; &lt; &quot; }
+<a href="#NWOjbSR-2rkOR9-7">n_ge</a>: <a href="#NWDOjbSR-5">GE</a> { Format.out &quot; &gt;= &quot; }
+<a href="#NWOjbSR-2rkOR9-7">n_le</a>: <a href="#NWDOjbSR-5">LE</a> { Format.out &quot; &lt;= &quot; }
+<a href="#NWOjbSR-2rkOR9-7">n_eq</a>: <a href="#NWDOjbSR-5">EQ</a> { Format.out &quot; == &quot; }
+<a href="#NWOjbSR-2rkOR9-7">n_ne</a>: <a href="#NWDOjbSR-5">NE</a> { Format.out &quot; != &quot; }
+</pre><blockquote>Defines <a href="#NWI-n_eq"><code>n_eq</code></a>, <a href="#NWI-n_ge"><code>n_ge</code></a>, <a href="#NWI-n_gt"><code>n_gt</code></a>, <a href="#NWI-n_le"><code>n_le</code></a>, <a href="#NWI-n_lt"><code>n_lt</code></a>, <a href="#NWI-n_ne"><code>n_ne</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2rkOR9-8" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-2rkOR9-7">&lt;-</a>D<a href="#NWOjbSR-2rkOR9-9">-&gt;</a>]</b>
+<a href="#NWOjbSR-2rkOR9-8">n_an</a>: <a href="#NWDOjbSR-5">AMP</a> { Format.out &quot; &amp; &quot; }
+<a href="#NWOjbSR-2rkOR9-8">n_xo</a>: <a href="#NWDOjbSR-5">CARET</a> { Format.out &quot; ^ &quot; }
+<a href="#NWOjbSR-2rkOR9-8">n_or</a>: <a href="#NWDOjbSR-5">BAR</a> { Format.out &quot; | &quot; }
+</pre><blockquote>Defines <a href="#NWI-n_an"><code>n_an</code></a>, <a href="#NWI-n_or"><code>n_or</code></a>, <a href="#NWI-n_xo"><code>n_xo</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-2rkOR9-9" href="#NWDOjbSR-F"><dfn>&lt;Rules for dummy nonterminals&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-B">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-2rkOR9-8">&lt;-</a>D]</b>
+<a href="#NWOjbSR-2rkOR9-9">n_as</a>: <a href="#NWDOjbSR-5">ASSIGN</a> { Format.out &quot; = &quot; }
+<a href="#NWOjbSR-2rkOR9-9">n_pe</a>: <a href="#NWDOjbSR-5">PE</a> { Format.out &quot; += &quot; }
+<a href="#NWOjbSR-2rkOR9-9">n_me</a>: <a href="#NWDOjbSR-5">ME</a> { Format.out &quot; -= &quot; }
+<a href="#NWOjbSR-2rkOR9-9">n_te</a>: <a href="#NWDOjbSR-5">TE</a> { Format.out &quot; *= &quot; }
+<a href="#NWOjbSR-2rkOR9-9">n_de</a>: <a href="#NWDOjbSR-5">DE</a> { Format.out &quot; /= &quot; }
+<a href="#NWOjbSR-2rkOR9-9">n_re</a>: <a href="#NWDOjbSR-5">RE</a> { Format.out &quot; %= &quot; }
+</pre><blockquote>Defines <a href="#NWI-n_as"><code>n_as</code></a>, <a href="#NWI-n_de"><code>n_de</code></a>, <a href="#NWI-n_me"><code>n_me</code></a>, <a href="#NWI-n_pe"><code>n_pe</code></a>, <a href="#NWI-n_re"><code>n_re</code></a>, <a href="#NWI-n_te"><code>n_te</code></a> (links are to index).<p>
+</blockquote><p>
+<pre><a name="NWOjbSR-1frP2J-4" href="#NWOjbSR-1frP2J-1"><dfn>&lt;Dummy nonterminal types&gt;+=</dfn></a> <b>(<a href="#NWDOjbSR-9">&lt;-U</a>)</b> <b>[<a href="#NWOjbSR-1frP2J-3">&lt;-</a>D]</b>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-F">n_int</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-F">n_identifier</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-2">n_lp</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-2">n_rp</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-2">n_co</a>
+%type &lt;Format.action&gt; n_sc
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-G">n_break</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-G">n_continue</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-G">n_return</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-G">n_lr</a>
+%type &lt;Format.action&gt; <a href="#NWDOjbSR-G">n_rr</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-5">n_if</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-5">n_else</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-5">n_while</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-5">n_constant</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-6">n_pp</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-6">n_mm</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-6">n_pl</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-6">n_mi</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-6">n_mu</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-6">n_di</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-6">n_rm</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-7">n_gt</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-7">n_lt</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-7">n_ge</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-7">n_le</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-7">n_eq</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-7">n_ne</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-8">n_an</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-8">n_xo</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-8">n_or</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-9">n_as</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-9">n_pe</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-9">n_me</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-9">n_te</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-9">n_de</a>
+%type &lt;Format.action&gt; <a href="#NWOjbSR-2rkOR9-9">n_re</a>
+</pre><p>
+
+<h2><a name="NWDOjbSR-H">Trailer</a></h2>
+<p>
+Empty trailer.
+<p>
+<pre><a name="NWOjbSR-4RYgx4-1" href="#NWDOjbSR-H"><dfn>&lt;Trailer&gt;=</dfn></a> <b>(<a href="#NWDOjbSR-1">&lt;-U</a>)</b>
+</pre><p>
+
+
+<h2>Limitations</h2>
+<p>
+All the token types should really be augmented with position
+information passed by the lexer, in order to be able to generate
+informative error messages.
+<p>
+<h2>Indices</h2>
+<h3>Chunks</h3>
+<ul>
+<li><a href="#NWDOjbSR-1"><i>&lt;*&gt;</i></a>: <a href="#NWDOjbSR-1">D1</a>
+<li><a href="#NWOjbSR-PEFGu-1"><i>&lt;<code>argument_list</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-PEFGu-1">D2</a>
+<li><a href="#NWOjbSR-2SFrQP-1"><i>&lt;<code>binary</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-2SFrQP-1">D2</a>
+<li><a href="#NWOjbSR-2G2zjw-1"><i>&lt;<code>compound_statement</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-2G2zjw-1">D2</a>
+<li><a href="#NWOjbSR-1Z3IqZ-1"><i>&lt;<code>declaration</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-1Z3IqZ-1">D2</a>
+<li><a href="#NWOjbSR-1CkrkX-1"><i>&lt;<code>declarations</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-1CkrkX-1">D2</a>
+<li><a href="#NWOjbSR-3LmLat-1"><i>&lt;<code>declarator_list</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-3LmLat-1">D2</a>
+<li><a href="#NWDOjbSR-D"><i>&lt;<code>definition</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWDOjbSR-D">D2</a>
+<li><a href="#NWDOjbSR-C"><i>&lt;<code>definitions</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWDOjbSR-C">D2</a>
+<li><a href="#NWOjbSR-44GxM1-1"><i>&lt;<code>expression</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-44GxM1-1">D2</a>
+<li><a href="#NWDOjbSR-E"><i>&lt;<code>function_definition</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWDOjbSR-E">D2</a>
+<li><a href="#NWOjbSR-zn0xc-1"><i>&lt;<code>if_prefix</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-zn0xc-1">D2</a>
+<li><a href="#NWOjbSR-3Pa0E6-1"><i>&lt;<code>loop_prefix</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-3Pa0E6-1">D2</a>
+<li><a href="#NWOjbSR-4ff7m-1"><i>&lt;<code>optional_argument_list</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-4ff7m-1">D2</a>
+<li><a href="#NWOjbSR-1k0Vpz-1"><i>&lt;<code>optional_parameter_list</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-1k0Vpz-1">D2</a>
+<li><a href="#NWOjbSR-4G7Bec-1"><i>&lt;<code>parameter_declaration</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-4G7Bec-1">D2</a>
+<li><a href="#NWOjbSR-3T7xCm-1"><i>&lt;<code>parameter_declarations</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-3T7xCm-1">D2</a>
+<li><a href="#NWOjbSR-WGLLv-1"><i>&lt;<code>parameter_declarator_list</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-WGLLv-1">D2</a>
+<li><a href="#NWOjbSR-154SJU-1"><i>&lt;<code>parameter_list</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-154SJU-1">D2</a>
+<li><a href="#NWOjbSR-309U3L-1"><i>&lt;<code>statement</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-309U3L-1">D2</a>
+<li><a href="#NWOjbSR-2CNcP3-1"><i>&lt;<code>statements</code>&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWOjbSR-2CNcP3-1">D2</a>
+<li><a href="#NWDOjbSR-3"><i>&lt;Declarations&gt;</i></a>: <a href="#NWDOjbSR-1">U1</a>, <a href="#NWDOjbSR-3">D2</a>
+<li><a href="#NWOjbSR-1frP2J-1"><i>&lt;Dummy nonterminal types&gt;</i></a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-1frP2J-1">D2</a>, <a href="#NWOjbSR-1frP2J-2">D3</a>, <a href="#NWOjbSR-1frP2J-3">D4</a>, <a href="#NWOjbSR-1frP2J-4">D5</a>
+<li><a href="#NWDOjbSR-8"><i>&lt;Entry points&gt;</i></a>: <a href="#NWDOjbSR-3">U1</a>, <a href="#NWDOjbSR-8">D2</a>
+<li><a href="#NWDOjbSR-2"><i>&lt;Header&gt;</i></a>: <a href="#NWDOjbSR-1">U1</a>, <a href="#NWDOjbSR-2">D2</a>
+<li><a href="#NWOjbSR-3YdKJI-1"><i>&lt;Main entry point&gt;</i></a>: <a href="#NWDOjbSR-A">U1</a>, <a href="#NWOjbSR-3YdKJI-1">D2</a>
+<li><a href="#NWDOjbSR-9"><i>&lt;Other nonterminal types&gt;</i></a>: <a href="#NWDOjbSR-3">U1</a>, <a href="#NWDOjbSR-9">D2</a>
+<li><a href="#NWDOjbSR-B"><i>&lt;Other rules&gt;</i></a>: <a href="#NWDOjbSR-A">U1</a>, <a href="#NWDOjbSR-B">D2</a>
+<li><a href="#NWDOjbSR-7"><i>&lt;Precedence&gt;</i></a>: <a href="#NWDOjbSR-3">U1</a>, <a href="#NWDOjbSR-7">D2</a>
+<li><a href="#NWDOjbSR-A"><i>&lt;Rules&gt;</i></a>: <a href="#NWDOjbSR-1">U1</a>, <a href="#NWDOjbSR-A">D2</a>
+<li><a href="#NWDOjbSR-F"><i>&lt;Rules for dummy nonterminals&gt;</i></a>: <a href="#NWDOjbSR-B">U1</a>, <a href="#NWDOjbSR-F">D2</a>, <a href="#NWOjbSR-2rkOR9-2">D3</a>, <a href="#NWOjbSR-2rkOR9-3">D4</a>, <a href="#NWDOjbSR-G">D5</a>, <a href="#NWOjbSR-2rkOR9-5">D6</a>, <a href="#NWOjbSR-2rkOR9-6">D7</a>, <a href="#NWOjbSR-2rkOR9-7">D8</a>, <a href="#NWOjbSR-2rkOR9-8">D9</a>, <a href="#NWOjbSR-2rkOR9-9">D10</a>
+<li><a href="#NWDOjbSR-4"><i>&lt;Tokens&gt;</i></a>: <a href="#NWDOjbSR-3">U1</a>, <a href="#NWDOjbSR-4">D2</a>, <a href="#NWDOjbSR-5">D3</a>, <a href="#NWDOjbSR-6">D4</a>
+<li><a href="#NWDOjbSR-H"><i>&lt;Trailer&gt;</i></a>: <a href="#NWDOjbSR-1">U1</a>, <a href="#NWDOjbSR-H">D2</a>
+</ul>
+<h3>Identifiers</h3>
+<ul>
+<li><a name="NWI-AMP" href="#NWDOjbSR-5">AMP</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-8">U4</a>
+<li><a name="NWI-argument_list" href="#NWOjbSR-PEFGu-1">argument_list</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-4ff7m-1">U2</a>, <a href="#NWOjbSR-PEFGu-1">D3</a>
+<li><a name="NWI-ASSIGN" href="#NWDOjbSR-5">ASSIGN</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-9">U4</a>
+<li><a name="NWI-BAR" href="#NWDOjbSR-5">BAR</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-8">U4</a>
+<li><a name="NWI-binary" href="#NWOjbSR-2SFrQP-1">binary</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-44GxM1-1">U2</a>, <a href="#NWOjbSR-2SFrQP-1">D3</a>, <a href="#NWOjbSR-PEFGu-1">U4</a>
+<li><a name="NWI-BREAK" href="#NWDOjbSR-5">BREAK</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-G">U2</a>
+<li><a name="NWI-CARET" href="#NWDOjbSR-5">CARET</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-8">U4</a>
+<li><a name="NWI-COMMA" href="#NWDOjbSR-5">COMMA</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWOjbSR-2rkOR9-2">U2</a>
+<li><a name="NWI-compound_statement" href="#NWOjbSR-2G2zjw-1">compound_statement</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWDOjbSR-E">U2</a>, <a href="#NWOjbSR-2G2zjw-1">D3</a>, <a href="#NWOjbSR-309U3L-1">U4</a>
+<li><a name="NWI-compound_statement_1" href="#NWOjbSR-2G2zjw-1">compound_statement_1</a>: <a href="#NWOjbSR-2G2zjw-1">D1</a>, <a href="#NWOjbSR-1frP2J-2">U2</a>
+<li><a name="NWI-Constant" href="#NWDOjbSR-4">Constant</a>: <a href="#NWDOjbSR-4">D1</a>, <a href="#NWOjbSR-2rkOR9-5">U2</a>
+<li><a name="NWI-CONTINUE" href="#NWDOjbSR-5">CONTINUE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-G">U2</a>
+<li><a name="NWI-DE" href="#NWDOjbSR-5">DE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-9">U3</a>
+<li><a name="NWI-declaration" href="#NWOjbSR-1Z3IqZ-1">declaration</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWDOjbSR-D">U2</a>, <a href="#NWOjbSR-1CkrkX-1">U3</a>, <a href="#NWOjbSR-1Z3IqZ-1">D4</a>
+<li><a name="NWI-declarations" href="#NWOjbSR-1CkrkX-1">declarations</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-2G2zjw-1">U2</a>, <a href="#NWOjbSR-1CkrkX-1">D3</a>
+<li><a name="NWI-declarator_list" href="#NWOjbSR-3LmLat-1">declarator_list</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-1Z3IqZ-1">U2</a>, <a href="#NWOjbSR-3LmLat-1">D3</a>
+<li><a name="NWI-definition" href="#NWDOjbSR-D">definition</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWDOjbSR-C">U2</a>, <a href="#NWDOjbSR-D">D3</a>
+<li><a name="NWI-definitions" href="#NWDOjbSR-C">definitions</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-3YdKJI-1">U2</a>, <a href="#NWDOjbSR-C">D3</a>
+<li><a name="NWI-DIVIDE" href="#NWDOjbSR-5">DIVIDE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-6">U3</a>
+<li><a name="NWI-ELSE" href="#NWDOjbSR-5">ELSE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWOjbSR-2rkOR9-5">U2</a>
+<li><a name="NWI-EOF" href="#NWDOjbSR-6">EOF</a>: <a href="#NWDOjbSR-6">D1</a>, <a href="#NWOjbSR-3YdKJI-1">U2</a>
+<li><a name="NWI-EQ" href="#NWDOjbSR-5">EQ</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-7">U4</a>
+<li><a name="NWI-expression" href="#NWOjbSR-44GxM1-1">expression</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-309U3L-1">U2</a>, <a href="#NWOjbSR-zn0xc-1">U3</a>, <a href="#NWOjbSR-3Pa0E6-1">U4</a>, <a href="#NWOjbSR-44GxM1-1">D5</a>, <a href="#NWOjbSR-2SFrQP-1">U6</a>
+<li><a name="NWI-function_definition" href="#NWDOjbSR-E">function_definition</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWDOjbSR-D">U2</a>, <a href="#NWDOjbSR-E">D3</a>
+<li><a name="NWI-function_definition_1" href="#NWDOjbSR-E">function_definition_1</a>: <a href="#NWDOjbSR-E">D1</a>, <a href="#NWOjbSR-1frP2J-1">U2</a>
+<li><a name="NWI-function_definition_2" href="#NWDOjbSR-E">function_definition_2</a>: <a href="#NWDOjbSR-E">D1</a>, <a href="#NWOjbSR-1frP2J-1">U2</a>
+<li><a name="NWI-GE" href="#NWDOjbSR-5">GE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-7">U3</a>
+<li><a name="NWI-GT" href="#NWDOjbSR-5">GT</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-7">U4</a>
+<li><a name="NWI-Identifier" href="#NWDOjbSR-4">Identifier</a>: <a href="#NWDOjbSR-4">D1</a>, <a href="#NWDOjbSR-F">U2</a>
+<li><a name="NWI-IF" href="#NWDOjbSR-5">IF</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWOjbSR-2rkOR9-5">U2</a>
+<li><a name="NWI-if_prefix" href="#NWOjbSR-zn0xc-1">if_prefix</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-309U3L-1">U2</a>, <a href="#NWOjbSR-zn0xc-1">D3</a>
+<li><a name="NWI-INT" href="#NWDOjbSR-5">INT</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-F">U2</a>
+<li><a name="NWI-LBRACE" href="#NWDOjbSR-5">LBRACE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-G">U2</a>
+<li><a name="NWI-LE" href="#NWDOjbSR-5">LE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-7">U3</a>
+<li><a name="NWI-loop_prefix" href="#NWOjbSR-3Pa0E6-1">loop_prefix</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-309U3L-1">U2</a>, <a href="#NWOjbSR-3Pa0E6-1">D3</a>
+<li><a name="NWI-LPAREN" href="#NWDOjbSR-5">LPAREN</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWOjbSR-2rkOR9-2">U2</a>
+<li><a name="NWI-LT" href="#NWDOjbSR-5">LT</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-7">U3</a>
+<li><a name="NWI-ME" href="#NWDOjbSR-5">ME</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-9">U3</a>
+<li><a name="NWI-MINUS" href="#NWDOjbSR-5">MINUS</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-6">U3</a>
+<li><a name="NWI-MM" href="#NWDOjbSR-5">MM</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-6">U3</a>
+<li><a name="NWI-n_an" href="#NWOjbSR-2rkOR9-8">n_an</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-8">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_as" href="#NWOjbSR-2rkOR9-9">n_as</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-9">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_break" href="#NWDOjbSR-G">n_break</a>: <a href="#NWOjbSR-309U3L-1">U1</a>, <a href="#NWDOjbSR-G">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_co" href="#NWOjbSR-2rkOR9-2">n_co</a>: <a href="#NWOjbSR-154SJU-1">U1</a>, <a href="#NWOjbSR-WGLLv-1">U2</a>, <a href="#NWOjbSR-3LmLat-1">U3</a>, <a href="#NWOjbSR-44GxM1-1">U4</a>, <a href="#NWOjbSR-PEFGu-1">U5</a>, <a href="#NWOjbSR-2rkOR9-2">D6</a>, <a href="#NWOjbSR-1frP2J-4">U7</a>
+<li><a name="NWI-n_constant" href="#NWOjbSR-2rkOR9-5">n_constant</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-5">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_continue" href="#NWDOjbSR-G">n_continue</a>: <a href="#NWOjbSR-309U3L-1">U1</a>, <a href="#NWDOjbSR-G">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_de" href="#NWOjbSR-2rkOR9-9">n_de</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-9">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_di" href="#NWOjbSR-2rkOR9-6">n_di</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-6">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_else" href="#NWOjbSR-2rkOR9-5">n_else</a>: <a href="#NWOjbSR-309U3L-1">U1</a>, <a href="#NWOjbSR-2rkOR9-5">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_eq" href="#NWOjbSR-2rkOR9-7">n_eq</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-7">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_ge" href="#NWOjbSR-2rkOR9-7">n_ge</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-7">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_gt" href="#NWOjbSR-2rkOR9-7">n_gt</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-7">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_identifier" href="#NWDOjbSR-F">n_identifier</a>: <a href="#NWDOjbSR-E">U1</a>, <a href="#NWOjbSR-154SJU-1">U2</a>, <a href="#NWOjbSR-WGLLv-1">U3</a>, <a href="#NWOjbSR-3LmLat-1">U4</a>, <a href="#NWOjbSR-2SFrQP-1">U5</a>, <a href="#NWDOjbSR-F">D6</a>, <a href="#NWOjbSR-1frP2J-4">U7</a>
+<li><a name="NWI-n_if" href="#NWOjbSR-2rkOR9-5">n_if</a>: <a href="#NWOjbSR-zn0xc-1">U1</a>, <a href="#NWOjbSR-2rkOR9-5">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_int" href="#NWDOjbSR-F">n_int</a>: <a href="#NWDOjbSR-D">U1</a>, <a href="#NWOjbSR-4G7Bec-1">U2</a>, <a href="#NWOjbSR-1Z3IqZ-1">U3</a>, <a href="#NWDOjbSR-F">D4</a>, <a href="#NWOjbSR-1frP2J-4">U5</a>
+<li><a name="NWI-n_le" href="#NWOjbSR-2rkOR9-7">n_le</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-7">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_lp" href="#NWOjbSR-2rkOR9-2">n_lp</a>: <a href="#NWDOjbSR-E">U1</a>, <a href="#NWOjbSR-zn0xc-1">U2</a>, <a href="#NWOjbSR-3Pa0E6-1">U3</a>, <a href="#NWOjbSR-2SFrQP-1">U4</a>, <a href="#NWOjbSR-2rkOR9-2">D5</a>, <a href="#NWOjbSR-1frP2J-4">U6</a>
+<li><a name="NWI-n_lr" href="#NWDOjbSR-G">n_lr</a>: <a href="#NWOjbSR-2G2zjw-1">U1</a>, <a href="#NWDOjbSR-G">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_lt" href="#NWOjbSR-2rkOR9-7">n_lt</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-7">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_me" href="#NWOjbSR-2rkOR9-9">n_me</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-9">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_mi" href="#NWOjbSR-2rkOR9-6">n_mi</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-6">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_mm" href="#NWOjbSR-2rkOR9-6">n_mm</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-6">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_mu" href="#NWOjbSR-2rkOR9-6">n_mu</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-6">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_ne" href="#NWOjbSR-2rkOR9-7">n_ne</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-7">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_or" href="#NWOjbSR-2rkOR9-8">n_or</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-8">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_pe" href="#NWOjbSR-2rkOR9-9">n_pe</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-9">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_pl" href="#NWOjbSR-2rkOR9-6">n_pl</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-6">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_pp" href="#NWOjbSR-2rkOR9-6">n_pp</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-6">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_re" href="#NWOjbSR-2rkOR9-9">n_re</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-9">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_return" href="#NWDOjbSR-G">n_return</a>: <a href="#NWOjbSR-309U3L-1">U1</a>, <a href="#NWDOjbSR-G">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_rm" href="#NWOjbSR-2rkOR9-6">n_rm</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-6">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_rp" href="#NWOjbSR-2rkOR9-2">n_rp</a>: <a href="#NWDOjbSR-E">U1</a>, <a href="#NWOjbSR-zn0xc-1">U2</a>, <a href="#NWOjbSR-3Pa0E6-1">U3</a>, <a href="#NWOjbSR-2SFrQP-1">U4</a>, <a href="#NWOjbSR-2rkOR9-2">D5</a>, <a href="#NWOjbSR-1frP2J-4">U6</a>
+<li><a name="NWI-n_rr" href="#NWDOjbSR-G">n_rr</a>: <a href="#NWOjbSR-2G2zjw-1">U1</a>, <a href="#NWDOjbSR-G">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_te" href="#NWOjbSR-2rkOR9-9">n_te</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-9">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_while" href="#NWOjbSR-2rkOR9-5">n_while</a>: <a href="#NWOjbSR-3Pa0E6-1">U1</a>, <a href="#NWOjbSR-2rkOR9-5">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-n_xo" href="#NWOjbSR-2rkOR9-8">n_xo</a>: <a href="#NWOjbSR-2SFrQP-1">U1</a>, <a href="#NWOjbSR-2rkOR9-8">D2</a>, <a href="#NWOjbSR-1frP2J-4">U3</a>
+<li><a name="NWI-NE" href="#NWDOjbSR-5">NE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-7">U3</a>
+<li><a name="NWI-optional_argument_list" href="#NWOjbSR-4ff7m-1">optional_argument_list</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-2SFrQP-1">U2</a>, <a href="#NWOjbSR-4ff7m-1">D3</a>
+<li><a name="NWI-optional_parameter_list" href="#NWOjbSR-1k0Vpz-1">optional_parameter_list</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWDOjbSR-E">U2</a>, <a href="#NWOjbSR-1k0Vpz-1">D3</a>
+<li><a name="NWI-parameter_declaration" href="#NWOjbSR-4G7Bec-1">parameter_declaration</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-3T7xCm-1">U2</a>, <a href="#NWOjbSR-4G7Bec-1">D3</a>
+<li><a name="NWI-parameter_declarations" href="#NWOjbSR-3T7xCm-1">parameter_declarations</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWDOjbSR-E">U2</a>, <a href="#NWOjbSR-3T7xCm-1">D3</a>
+<li><a name="NWI-parameter_declarator_list" href="#NWOjbSR-WGLLv-1">parameter_declarator_list</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-4G7Bec-1">U2</a>, <a href="#NWOjbSR-WGLLv-1">D3</a>
+<li><a name="NWI-parameter_list" href="#NWOjbSR-154SJU-1">parameter_list</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-1k0Vpz-1">U2</a>, <a href="#NWOjbSR-154SJU-1">D3</a>
+<li><a name="NWI-PE" href="#NWDOjbSR-5">PE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-9">U3</a>
+<li><a name="NWI-PLUS" href="#NWDOjbSR-5">PLUS</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-6">U4</a>
+<li><a name="NWI-PP" href="#NWDOjbSR-5">PP</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-6">U4</a>
+<li><a name="NWI-program" href="#NWOjbSR-3YdKJI-1">program</a>: <a href="#NWDOjbSR-8">U1</a>, <a href="#NWOjbSR-3YdKJI-1">D2</a>
+<li><a name="NWI-RBRACE" href="#NWDOjbSR-5">RBRACE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-G">U2</a>
+<li><a name="NWI-RE" href="#NWDOjbSR-5">RE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-9">U3</a>
+<li><a name="NWI-REM" href="#NWDOjbSR-5">REM</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-6">U3</a>
+<li><a name="NWI-RETURN" href="#NWDOjbSR-5">RETURN</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-G">U2</a>
+<li><a name="NWI-RPAREN" href="#NWDOjbSR-5">RPAREN</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWOjbSR-2rkOR9-2">U2</a>
+<li><a name="NWI-SEMI" href="#NWDOjbSR-5">SEMI</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWOjbSR-2rkOR9-3">U2</a>
+<li><a name="NWI-statement" href="#NWOjbSR-309U3L-1">statement</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-2CNcP3-1">U2</a>, <a href="#NWOjbSR-309U3L-1">D3</a>
+<li><a name="NWI-statement_1" href="#NWOjbSR-309U3L-1">statement_1</a>: <a href="#NWOjbSR-309U3L-1">D1</a>, <a href="#NWOjbSR-1frP2J-3">U2</a>
+<li><a name="NWI-statements" href="#NWOjbSR-2CNcP3-1">statements</a>: <a href="#NWDOjbSR-9">U1</a>, <a href="#NWOjbSR-2G2zjw-1">U2</a>, <a href="#NWOjbSR-2CNcP3-1">D3</a>
+<li><a name="NWI-TE" href="#NWDOjbSR-5">TE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2rkOR9-9">U3</a>
+<li><a name="NWI-TIMES" href="#NWDOjbSR-5">TIMES</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWDOjbSR-7">D2</a>, <a href="#NWOjbSR-2SFrQP-1">U3</a>, <a href="#NWOjbSR-2rkOR9-6">U4</a>
+<li><a name="NWI-WHILE" href="#NWDOjbSR-5">WHILE</a>: <a href="#NWDOjbSR-5">D1</a>, <a href="#NWOjbSR-2rkOR9-5">U2</a>
+</ul>
+<p>
+<h2>References</h2>
+<p>
+<a name="NWcite-Schreiner and Friedman"><b>[1]</b></a> 
+Axel T. Schreiner and H. George Friedman, Jr.
+<em>
+<a name="NWDOjbSR-I">Introduction to Compiler Construction with UNIX</a> <b>[</b>UNIX is a trademark of Bell Laboratories.<b>]</b> 
+</em>.
+Prentice-Hall, Inc., New Jersey, 1985.
+<p>
+
+
+<!--%% Local Variables:-->
+<!--%% noweb-code-mode: sml-mode-->
+<!--%% End:-->
+
+
+</body></html>
+
