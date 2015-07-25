@@ -1,5 +1,7 @@
 # Pretty-printer program implemented in Standard ML in 1996
 
+[![Build Status](https://travis-ci.org/FranklinChen/schreiner-friedman-pretty-printer.png)](https://travis-ci.org/FranklinChen/schreiner-friedman-pretty-printer)
+
 I implemented a pretty-printer from Schreiner and Friedman's
 "Introduction to Compiler Construction with UNIX", 1985.
 
@@ -35,5 +37,5 @@ longer have Noweb LaTeX stuff in my `TEXINPUTS`.
 ```console
 $ brew install mosml
 $ brew install noweb
-$ TEXINPUTS=/usr/local/opt/noweb/tex/generic/noweb: make
+$ make TEXINPUTS=/usr/local/opt/noweb/tex/generic/noweb:
 ```

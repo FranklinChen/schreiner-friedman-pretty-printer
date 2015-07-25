@@ -1,0 +1,12 @@
+language: objective-c
+
+env:
+  - TEXINPUTS=/usr/local/opt/noweb/tex/generic/noweb:
+
+before_install:
+  - brew update
+  - brew outdated mosml || brew install mosml
+  - brew outdated noweb || brew install noweb
+
+script:
+  - make
