@@ -59,7 +59,7 @@ all: fmt doc
 fmt: $(SML_OBJS)
 	$(MOSMLLD) $(MOSMLLDFLAGS) -o $@ $(LIBOBJS) $(SML_OBJS)
 
-doc: Lexer.dvi Parser.dvi Format.dvi Main.dvi \
+doc: Lexer.pdf Parser.pdf Format.pdf Main.pdf \
 	Lexer.html Parser.html Format.html Main.html
 
 install:
@@ -67,7 +67,7 @@ install:
 # FMC need add stuff.
 clean:
 	rm -f *.ui *.uo Makefile.bak \
-	*~ *.aux *.ltx *.dvi *.log *.html \
+	*~ *.aux *.ltx *.pdf *.log *.html \
 	$(SML_GEN) fmt *.lex *.grm *.output
 
 depend: $(SML_SRC)

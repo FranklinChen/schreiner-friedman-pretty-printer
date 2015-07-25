@@ -2,15 +2,12 @@ NOTANGLE=notangle
 NOWEAVE=noweave
 #CPIF=>
 CPIF=| cpif
-L2H=/usr/lib/noweb/l2h
+L2H=l2h
 
-.SUFFIXES: .nw .ltx .dvi .html
+.SUFFIXES: .nw .ltx .pdf .html
 .nw.html:
 	$(NOWEAVE) -filter $(L2H) -index -html $< $(CPIF) $@
 .nw.ltx:
 	$(NOWEAVE) -index $< $(CPIF) $@
-.ltx.dvi:
-	latex '\scrollmode \input ' $<
-	while grep -s 'Rerun to get cross-references right' $*.log; do \
-		latex '\scrollmode \input ' $<; \
-	done
+.ltx.pdf:
+	latexmk -pdf $<
