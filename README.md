@@ -30,9 +30,15 @@ With a little bit of coaxing, I actually got everything to build on my
 Mac **19 years later**! The only minor change I made was to generate
 PDF instead of DVI.
 
+By coincidence, a month ago I discovered Moscow ML was still alive,
+and I [contributed a Homebrew formula](https://github.com/kfl/mosml/issues/33
+).
+
 Also, I had to fix the Homebrew formula for Noweb, and today I no
 longer have Noweb LaTeX stuff in my `TEXINPUTS`.
 
+And I use `latexmk` not installed through Homebrew but as part of the
+[MacTeX](https://tug.org/mactex/) distribution.
 
 ```console
 $ brew install mosml

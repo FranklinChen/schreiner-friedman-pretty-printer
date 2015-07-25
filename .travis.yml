@@ -9,4 +9,5 @@ before_install:
   - brew outdated noweb || brew install noweb
 
 script:
-  - make
+  # Don't make everything until noweb formula is fixed.
+  - make fmt
